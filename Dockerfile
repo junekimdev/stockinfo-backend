@@ -3,6 +3,11 @@ FROM rust:bookworm
 
 LABEL maintainer="June Kim" version="1.0"
 
+RUN apt-get update \
+    && apt-get install -y \
+      cmake \
+    && rm -rf /var/lib/apt/lists/*
+
 EXPOSE 4000
 
 ENV RUST_MODE=production
