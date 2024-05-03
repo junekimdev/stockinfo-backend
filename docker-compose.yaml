@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    expose:
+      - 5432
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - .env
+
+  cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    expose:
+      - 6379
+    volumes:
+      - ./data/redis:/data
+    env_file:
+      - .env
+
+  backend:
+    image: ghcr.io/junekimdev/stockinfo-backend:1.0.0
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - cache
+    expose:
+      - 4000
+    volumes:
+      - ./config:/app/config
+    networks:
+      - nginx-proxy
+      - jaeger-tracer
+      - default
+    hostname: stockinfo-backend
+
+networks:
+  nginx-proxy:
+    external: true
+  jaeger-tracer:
+    external: true

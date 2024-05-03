@@ -1,0 +1,34 @@
+# Git repo
+.git
+.gitignore
+
+# Editor
+.vscode
+
+# All Markdown documents except README
+*.md
+!README*.md
+
+# Builders
+Makefile
+Dockerfile
+docker-compose*
+
+# Config
+config
+!config/default.toml
+
+# documents
+doc
+
+# Environment
+.env*
+*.env
+
+# data
+data
+keys
+uploads
+
+# Build files
+target
