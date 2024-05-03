@@ -32,7 +32,7 @@ target/
 # Dev tools
 /.vscode
 placeholder_*
-/config
+/config/*
 !/config/default.*
 
 # log

@@ -1,0 +1,37 @@
+[server]
+host = "localhost"
+port = 4000
+
+[jaeger]
+agent_endpoint = "http://localhost:4317"
+
+[cors]
+origins = ["localhost:4000"]
+allow_all_subdomains_of = ["localhost"]
+
+[pg]
+host = "localhost"
+port = 5432
+dbname = "postgres"
+user = "postgres"
+password = "postgres"
+pool = { max_size = 16, timeouts.wait = { secs = 5, nanos = 0 }}
+
+[redis]
+url = "redis://localhost:6379"
+pool = { max_size = 10, timeouts.wait = { secs = 2, nanos = 0 }}
+
+[govdata]
+key = "key"
+
+[govdata.url]
+price = "https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo"
+company = "https://apis.data.go.kr/1160100/service/GetKrxListedInfoService/getItemInfo"
+
+[dart]
+key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+[dart.url]
+statement = "https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json"
+index = "https://opendart.fss.or.kr/api/fnlttSinglIndx.json"
+code = "https://opendart.fss.or.kr/api/corpCode.xml"
