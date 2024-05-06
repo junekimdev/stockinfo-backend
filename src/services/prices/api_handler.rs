@@ -83,7 +83,7 @@ pub async fn handler_get_exists(
 
 #[tracing::instrument(err)]
 #[actix_web::delete("/prices")]
-pub async fn handler_clear(req: actix_web::HttpRequest) -> Result<actix_web::HttpResponse> {
+pub async fn handler_del(req: actix_web::HttpRequest) -> Result<actix_web::HttpResponse> {
     provider::clear_prices().await?;
 
     // Return result
