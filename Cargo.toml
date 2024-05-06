@@ -29,7 +29,7 @@ opentelemetry-otlp = "0.15"
 
 # files
 zip = "1.1"
-xmltree = "0.10"
+roxmltree = "0.19"
 
 # Utils
 dotenv = "0.15"

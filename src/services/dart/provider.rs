@@ -21,7 +21,7 @@ pub async fn build_code_db() -> Result<()> {
             .get(req_url.clone())
             .header(reqwest::header::HOST, host)
             .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
-            .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
+            .header(reqwest::header::ACCEPT, "application/xml;charset=UTF-8")
             .query(&[("crtfc_key", key.as_str())])
             .send()
             .unwrap()
@@ -31,19 +31,39 @@ pub async fn build_code_db() -> Result<()> {
     })
     .await?;
 
-    // Extract data from the file
+    // Unzip the downloaded file
     let res_reader = std::io::Cursor::new(res);
-    let mut xml_file: Vec<u8> = Vec::new();
+    let mut xml_file = String::new();
     zip::read::ZipArchive::new(res_reader)?
         .by_name("CORPCODE.xml")?
-        .read_to_end(&mut xml_file)?;
-    let xml_reader = std::io::Cursor::new(xml_file);
-    let root = xmltree::Element::parse(xml_reader)?;
+        .read_to_string(&mut xml_file)?;
 
+    // Extract data from the file
+    let doc = roxmltree::Document::parse(&xml_file)?;
     let mut codes: Vec<DartCode> = Vec::new();
-    for child in root.children {
-        let code = extract_code(&child).ok_or("Failed to extract code out of XML Node")?;
-        codes.push(code);
+    for child in doc.root_element().children() {
+        if child.is_element() {
+            let mut code = String::new();
+            let mut name = String::new();
+            let mut date = String::new();
+            let elements: Vec<roxmltree::Node> =
+                child.children().filter(move |v| v.is_element()).collect();
+
+            for el in elements {
+                match el.tag_name().name() {
+                    "corp_code" => code = el.text().unwrap().to_string(),
+                    "corp_name" => name = el.text().unwrap().to_string(),
+                    "modify_date" => date = el.text().unwrap().to_string(),
+                    _ => (),
+                }
+            }
+
+            codes.push(DartCode {
+                corp_code: code,
+                corp_name: name,
+                modify_date: parse_date_from(&date).unwrap(),
+            });
+        }
     }
 
     // Store data in DB
@@ -180,16 +200,4 @@ pub async fn get_statement(
     }
 
     Ok(res)
-}
-
-fn extract_code(node: &xmltree::XMLNode) -> Option<DartCode> {
-    let el = node.as_element()?;
-    let corp_code = el.get_child("corp_code")?.get_text()?.to_string();
-    let corp_name = el.get_child("corp_name")?.get_text()?.to_string();
-    let modify_date = el.get_child("modify_date")?.get_text()?.to_string();
-    Some(DartCode {
-        corp_code,
-        corp_name,
-        modify_date: parse_date_from(&modify_date).unwrap(),
-    })
 }

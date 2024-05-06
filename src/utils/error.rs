@@ -30,7 +30,7 @@ pub enum Error {
     TimeParse(time::error::Parse),
     TimeComponentRange(time::error::ComponentRange),
     Zip(zip::result::ZipError),
-    XmltreeParse(xmltree::ParseError),
+    XmltreeParse(roxmltree::Error),
 
     // HTTP Error responses
     E400BadRequest(String),
@@ -263,8 +263,8 @@ impl From<zip::result::ZipError> for Error {
     }
 }
 
-impl From<xmltree::ParseError> for Error {
-    fn from(err: xmltree::ParseError) -> Self {
+impl From<roxmltree::Error> for Error {
+    fn from(err: roxmltree::Error) -> Self {
         Self::XmltreeParse(err)
     }
 }
