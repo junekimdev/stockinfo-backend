@@ -83,7 +83,7 @@ pub async fn build_company_db() -> Result<()> {
 
 #[tracing::instrument]
 pub async fn get_company(search_word: &str) -> Result<Vec<StockCompanySearchRes>> {
-    const SQL: &str = "SELECT * FROM company WHERE itms_nm LIKE $1 OR corp_nm LIKE $1;";
+    const SQL: &str = "SELECT * FROM company WHERE itms_nm ILIKE $1 OR corp_nm ILIKE $1;";
 
     let word = format!("%{}%", search_word);
 
