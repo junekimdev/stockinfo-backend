@@ -12,4 +12,6 @@ pub fn build() -> actix_web::Scope {
         .service(crate::services::dart::handler_post_code)
         .service(crate::services::dart::handler_get_index)
         .service(crate::services::dart::handler_get_statement)
+        .service(crate::services::tickers::handler_get)
+        .service(crate::services::tickers::handler_post)
 }

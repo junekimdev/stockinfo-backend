@@ -43,6 +43,18 @@ pub struct Dart {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct UsStockUrl {
+    pub ticker: String,
+    pub edgar: String,
+    pub price: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct UsStock {
+    pub url: UsStockUrl,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Settings {
     pub server: Server,
     pub jaeger: Jaeger,
@@ -51,6 +63,7 @@ pub struct Settings {
     pub redis: deadpool_redis::Config,
     pub govdata: Govdata,
     pub dart: Dart,
+    pub us_stock: UsStock,
 }
 
 static SETTINGS: std::sync::OnceLock<Settings> = std::sync::OnceLock::new();
