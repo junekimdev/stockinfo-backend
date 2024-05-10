@@ -26,7 +26,7 @@ pub fn parse_date_from(str: &str) -> crate::utils::Result<time::Date> {
         Err(e1) => match time::Date::parse(str, &format2) {
             Ok(d2) => Ok(d2),
             Err(e2) => Err(Error::General(format!(
-                "{} {}",
+                "{} | {}",
                 &e1.to_string(),
                 &e2.to_string()
             ))),
