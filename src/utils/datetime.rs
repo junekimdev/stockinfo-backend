@@ -131,7 +131,7 @@ impl<'de> serde::de::Visitor<'de> for DateVisitor {
     type Value = time::Date;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(formatter, "string in date format: YYYYMMDD")
+        write!(formatter, "string in date format: YYYYMMDD | YYYY-MM-DD")
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
@@ -145,7 +145,7 @@ impl<'de> serde::de::Visitor<'de> for DateVisitor {
             Err(e1) => match time::Date::parse(v, &format2) {
                 Ok(d2) => Ok(d2),
                 Err(e2) => Err(E::custom(format!(
-                    "{} {}",
+                    "{} | {}",
                     &e1.to_string(),
                     &e2.to_string()
                 ))),
@@ -164,7 +164,7 @@ impl<'de> serde::de::Visitor<'de> for DateVisitor {
             Err(e1) => match time::Date::parse(&v, &format2) {
                 Ok(d2) => Ok(d2),
                 Err(e2) => Err(E::custom(format!(
-                    "{} {}",
+                    "{} | {}",
                     &e1.to_string(),
                     &e2.to_string()
                 ))),
