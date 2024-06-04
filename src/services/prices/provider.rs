@@ -226,6 +226,7 @@ async fn update_weekly_price_db(map: WeeklyPriceHashMap) -> Result<()> {
             close = EXCLUDED.close,
             high = EXCLUDED.high,
             low = EXCLUDED.low,
+            volume = EXCLUDED.volume,
             base_stock_cnt = EXCLUDED.base_stock_cnt;";
 
     let mut db_client = db::pool().get().await?;
@@ -301,8 +302,8 @@ fn aggregate_to_weekly(
     let close = Decimal::from(v[last_index].clpr);
     let mut high = (Decimal::from(v[0].hipr) * init_adj_scale).round();
     let mut low = (Decimal::from(v[0].lopr) * init_adj_scale).round();
-    let mut volume = Decimal::from(0);
-    let mut trading_value = Decimal::from(0);
+    let mut volume = Decimal::ZERO;
+    let mut trading_value = Decimal::ZERO;
 
     for item in v {
         let adj_scale = item.lstg_st_cnt / base;

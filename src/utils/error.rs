@@ -31,6 +31,7 @@ pub enum Error {
     TimeComponentRange(time::error::ComponentRange),
     Zip(zip::result::ZipError),
     XmltreeParse(roxmltree::Error),
+    Decimal(rust_decimal::Error),
 
     // HTTP Error responses
     E400BadRequest(String),
@@ -79,6 +80,7 @@ impl std::fmt::Display for Error {
             TimeComponentRange(e) => e.fmt(f),
             Zip(e) => e.fmt(f),
             XmltreeParse(e) => e.fmt(f),
+            Decimal(e) => e.fmt(f),
 
             E400BadRequest(s) => write!(f, "BAD_REQUEST {}", s),
             E401Unauthorized(s) => write!(f, "UNAUTHORIZED {}", s),
@@ -266,5 +268,11 @@ impl From<zip::result::ZipError> for Error {
 impl From<roxmltree::Error> for Error {
     fn from(err: roxmltree::Error) -> Self {
         Self::XmltreeParse(err)
+    }
+}
+
+impl From<rust_decimal::Error> for Error {
+    fn from(err: rust_decimal::Error) -> Self {
+        Self::Decimal(err)
     }
 }

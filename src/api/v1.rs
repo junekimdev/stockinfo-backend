@@ -1,5 +1,11 @@
 pub fn build() -> actix_web::Scope {
     actix_web::web::scope("/v1")
+        .service(crate::services::prices_us::handler_post)
+        .service(crate::services::prices_us::handler_put)
+        .service(crate::services::prices_us::handler_get_daily)
+        .service(crate::services::prices_us::handler_get_weekly)
+        .service(crate::services::prices_us::handler_get_exists)
+        .service(crate::services::prices_us::handler_del)
         .service(crate::services::prices::handler_post)
         .service(crate::services::prices::handler_put)
         .service(crate::services::prices::handler_get_daily)
@@ -12,4 +18,7 @@ pub fn build() -> actix_web::Scope {
         .service(crate::services::dart::handler_post_code)
         .service(crate::services::dart::handler_get_index)
         .service(crate::services::dart::handler_get_statement)
+        .service(crate::services::tickers::handler_get)
+        .service(crate::services::tickers::handler_post)
+        .service(crate::services::edgar::handler_get)
 }

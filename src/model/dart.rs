@@ -3,21 +3,21 @@ use deadpool_redis::redis;
 
 #[allow(unused)]
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct DartCode {
+pub struct Code {
     pub corp_code: String,
     pub corp_name: String,
     pub modify_date: time::Date,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct DartIndexRes {
+pub struct IndexRes {
     pub status: String,
     pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub list: Option<Vec<DartIndexItem>>,
+    pub list: Option<Vec<IndexItem>>,
 }
 
-impl redis::ToRedisArgs for DartIndexRes {
+impl redis::ToRedisArgs for IndexRes {
     fn write_redis_args<W>(&self, out: &mut W)
     where
         W: ?Sized + redis::RedisWrite,
@@ -26,7 +26,7 @@ impl redis::ToRedisArgs for DartIndexRes {
     }
 }
 
-impl redis::FromRedisValue for DartIndexRes {
+impl redis::FromRedisValue for IndexRes {
     fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
         match *v {
             redis::Value::Data(ref bytes) => {
@@ -39,7 +39,7 @@ impl redis::FromRedisValue for DartIndexRes {
                 "Response was of incompatible type",
                 format!(
                     "{:?} (response was {:?})",
-                    "Response type not DartIndexRes compatible", v
+                    "Response type not dart::IndexRes compatible", v
                 ),
             ))),
         }
@@ -47,7 +47,7 @@ impl redis::FromRedisValue for DartIndexRes {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct DartIndexItem {
+pub struct IndexItem {
     pub bsns_year: String,
     pub corp_code: String,
     pub stock_code: String,
@@ -61,14 +61,14 @@ pub struct DartIndexItem {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct DartStatementRes {
+pub struct StatementRes {
     pub status: String,
     pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub list: Option<Vec<DartStatementItem>>,
+    pub list: Option<Vec<StatementItem>>,
 }
 
-impl redis::ToRedisArgs for DartStatementRes {
+impl redis::ToRedisArgs for StatementRes {
     fn write_redis_args<W>(&self, out: &mut W)
     where
         W: ?Sized + redis::RedisWrite,
@@ -77,7 +77,7 @@ impl redis::ToRedisArgs for DartStatementRes {
     }
 }
 
-impl redis::FromRedisValue for DartStatementRes {
+impl redis::FromRedisValue for StatementRes {
     fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
         match *v {
             redis::Value::Data(ref bytes) => {
@@ -90,7 +90,7 @@ impl redis::FromRedisValue for DartStatementRes {
                 "Response was of incompatible type",
                 format!(
                     "{:?} (response was {:?})",
-                    "Response type not DartStatementRes compatible", v
+                    "Response type not dart::StatementRes compatible", v
                 ),
             ))),
         }
@@ -98,7 +98,7 @@ impl redis::FromRedisValue for DartStatementRes {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct DartStatementItem {
+pub struct StatementItem {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rcept_no: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

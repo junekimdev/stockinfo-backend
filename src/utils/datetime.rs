@@ -26,7 +26,7 @@ pub fn parse_date_from(str: &str) -> crate::utils::Result<time::Date> {
         Err(e1) => match time::Date::parse(str, &format2) {
             Ok(d2) => Ok(d2),
             Err(e2) => Err(Error::General(format!(
-                "{} {}",
+                "{} | {}",
                 &e1.to_string(),
                 &e2.to_string()
             ))),
@@ -131,7 +131,7 @@ impl<'de> serde::de::Visitor<'de> for DateVisitor {
     type Value = time::Date;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(formatter, "string in date format: YYYYMMDD")
+        write!(formatter, "string in date format: YYYYMMDD | YYYY-MM-DD")
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
@@ -145,7 +145,7 @@ impl<'de> serde::de::Visitor<'de> for DateVisitor {
             Err(e1) => match time::Date::parse(v, &format2) {
                 Ok(d2) => Ok(d2),
                 Err(e2) => Err(E::custom(format!(
-                    "{} {}",
+                    "{} | {}",
                     &e1.to_string(),
                     &e2.to_string()
                 ))),
@@ -164,7 +164,7 @@ impl<'de> serde::de::Visitor<'de> for DateVisitor {
             Err(e1) => match time::Date::parse(&v, &format2) {
                 Ok(d2) => Ok(d2),
                 Err(e2) => Err(E::custom(format!(
-                    "{} {}",
+                    "{} | {}",
                     &e1.to_string(),
                     &e2.to_string()
                 ))),
@@ -180,4 +180,41 @@ where
     D: serde::Deserializer<'de>,
 {
     deserializer.deserialize_string(DateVisitor)
+}
+
+struct DateOptVisitor;
+
+impl<'de> serde::de::Visitor<'de> for DateOptVisitor {
+    type Value = Option<time::Date>;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            formatter,
+            "optional string in date format: YYYYMMDD | YYYY-MM-DD"
+        )
+    }
+
+    fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        // delegate deserializing to date_deserialize() and wrap the result with Some()
+        date_deserialize(deserializer).map(Some)
+    }
+
+    fn visit_none<E>(self) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(None)
+    }
+}
+
+#[allow(unused)]
+/// Deserialize Optional time::Date from string
+pub fn date_opt_deserialize<'de, D>(deserializer: D) -> Result<Option<time::Date>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    deserializer.deserialize_option(DateOptVisitor)
 }

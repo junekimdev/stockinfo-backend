@@ -1,5 +1,5 @@
 use super::provider;
-use crate::model::{DartIndexRes, DartStatementRes};
+use crate::model::dart;
 use crate::utils::{cache, error::Error, Result};
 
 #[tracing::instrument(err)]
@@ -60,7 +60,7 @@ pub async fn handler_get_index(
     }
 
     // cache first
-    if let Some(data_in_cache) = cache::get::<Option<DartIndexRes>>(req.path()).await? {
+    if let Some(data_in_cache) = cache::get::<Option<dart::IndexRes>>(req.path()).await? {
         return Ok(actix_web::HttpResponse::Ok().json(data_in_cache));
     };
 
@@ -104,7 +104,7 @@ pub async fn handler_get_statement(
     }
 
     // cache first
-    if let Some(data_in_cache) = cache::get::<Option<DartStatementRes>>(req.path()).await? {
+    if let Some(data_in_cache) = cache::get::<Option<dart::StatementRes>>(req.path()).await? {
         return Ok(actix_web::HttpResponse::Ok().json(data_in_cache));
     };
 

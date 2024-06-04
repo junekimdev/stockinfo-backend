@@ -35,3 +35,9 @@ key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 statement = "https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json"
 index = "https://opendart.fss.or.kr/api/fnlttSinglIndx.json"
 code = "https://opendart.fss.or.kr/api/corpCode.xml"
+
+[us_stock.url]
+ticker = "https://www.sec.gov/files/company_tickers.json"
+submissions = "https://data.sec.gov/submissions/CIK"
+edgar = "https://www.sec.gov/Archives/edgar/data"
+price = "https://query1.finance.yahoo.com/v7/finance/download"

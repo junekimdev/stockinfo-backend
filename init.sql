@@ -70,6 +70,39 @@ CREATE TABLE price_weekly (
   UNIQUE(srtn_cd, year, week)
 );
 
--- select year, week, open, high, low, close, base_stock_cnt from price_weekly order by opening_date;
 
--- INSERT (name, )
+-------------------- US Stock --------------------
+CREATE TABLE ticker (
+  id SERIAL PRIMARY KEY,
+  cik_str CHAR(10),
+  ticker VARCHAR(10),
+  title TEXT
+);
+
+CREATE TABLE price_us (
+  id SERIAL PRIMARY KEY,
+  ticker VARCHAR(10),
+  date DATE,
+  open DECIMAL,
+  high DECIMAL,
+  low DECIMAL,
+  close DECIMAL,
+  adj_close DECIMAL,
+  volume DECIMAL,
+  UNIQUE(ticker, date)
+);
+
+CREATE TABLE price_us_weekly (
+  id SERIAL PRIMARY KEY,
+  ticker VARCHAR(10),
+  year INTEGER,
+  week INTEGER,
+  opening_date DATE,
+  closing_date DATE,
+  open DECIMAL,
+  high DECIMAL,
+  low DECIMAL,
+  close DECIMAL,
+  volume DECIMAL,
+  UNIQUE(ticker, year, week)
+);
