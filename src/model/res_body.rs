@@ -104,3 +104,76 @@ pub struct StockPriceExistsRes {
     pub srtn_cd: String,
     pub exists: bool,
 }
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct StockUSWeeklyPriceRes {
+    pub ticker: String,
+    pub prices: Vec<StockUSWeekPrice>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct StockUSWeekPrice {
+    pub year: i32,
+    pub week: i32,
+    #[serde(serialize_with = "date_serialize")]
+    pub opening_date: time::Date,
+    #[serde(serialize_with = "date_serialize")]
+    pub closing_date: time::Date,
+    pub open: rust_decimal::Decimal,
+    pub high: rust_decimal::Decimal,
+    pub low: rust_decimal::Decimal,
+    pub close: rust_decimal::Decimal,
+    pub volume: rust_decimal::Decimal,
+}
+
+impl From<&tokio_postgres::Row> for StockUSWeekPrice {
+    fn from(value: &tokio_postgres::Row) -> Self {
+        Self {
+            year: value.get("year"),
+            week: value.get("week"),
+            opening_date: value.get("opening_date"),
+            closing_date: value.get("closing_date"),
+            open: value.get("open"),
+            high: value.get("high"),
+            low: value.get("low"),
+            close: value.get("close"),
+            volume: value.get("volume"),
+        }
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct StockUSDayPriceRes {
+    pub ticker: String,
+    pub prices: Vec<StockUSDayPrice>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct StockUSDayPrice {
+    #[serde(serialize_with = "date_serialize")]
+    pub date: time::Date,
+    pub open: rust_decimal::Decimal,
+    pub high: rust_decimal::Decimal,
+    pub low: rust_decimal::Decimal,
+    pub close: rust_decimal::Decimal,
+    pub volume: rust_decimal::Decimal,
+}
+
+impl From<&tokio_postgres::Row> for StockUSDayPrice {
+    fn from(value: &tokio_postgres::Row) -> Self {
+        Self {
+            date: value.get("date"),
+            open: value.get("open"),
+            high: value.get("high"),
+            low: value.get("low"),
+            close: value.get("close"),
+            volume: value.get("volume"),
+        }
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct StockUSPriceExistsRes {
+    pub ticker: String,
+    pub exists: bool,
+}
