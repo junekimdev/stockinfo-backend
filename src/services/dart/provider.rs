@@ -1,4 +1,4 @@
-use crate::model::{DartCode, DartIndexRes, DartStatementRes};
+use crate::model::dart;
 use crate::utils::{
     datetime::parse_date_from,
     db,
@@ -40,7 +40,7 @@ pub async fn build_code_db() -> Result<()> {
 
     // Extract data from the file
     let doc = roxmltree::Document::parse(&xml_file)?;
-    let mut codes: Vec<DartCode> = Vec::new();
+    let mut codes: Vec<dart::Code> = Vec::new();
     for child in doc.root_element().children() {
         if child.is_element() {
             let mut code = String::new();
@@ -58,7 +58,7 @@ pub async fn build_code_db() -> Result<()> {
                 }
             }
 
-            codes.push(DartCode {
+            codes.push(dart::Code {
                 corp_code: code,
                 corp_name: name,
                 modify_date: parse_date_from(&date).unwrap(),
@@ -104,7 +104,11 @@ pub async fn get_dart_code(name: &str) -> Result<String> {
     Ok(res)
 }
 
-pub async fn get_index(corp_code: &str, report_code: &str, idx_code: &str) -> Result<DartIndexRes> {
+pub async fn get_index(
+    corp_code: &str,
+    report_code: &str,
+    idx_code: &str,
+) -> Result<dart::IndexRes> {
     let Dart { key, url } = Settings::instance().dart.clone();
     let last_year = time::OffsetDateTime::now_utc().year() - 1;
     let req_url = reqwest::Url::parse(&url.index).unwrap();
@@ -128,7 +132,7 @@ pub async fn get_index(corp_code: &str, report_code: &str, idx_code: &str) -> Re
         ])
         .send()
         .await?
-        .json::<DartIndexRes>()
+        .json::<dart::IndexRes>()
         .await?;
 
     // status 013 means data NOT_FOUND
@@ -144,7 +148,7 @@ pub async fn get_index(corp_code: &str, report_code: &str, idx_code: &str) -> Re
             ])
             .send()
             .await?
-            .json::<DartIndexRes>()
+            .json::<dart::IndexRes>()
             .await?;
     }
 
@@ -155,7 +159,7 @@ pub async fn get_statement(
     corp_code: &str,
     report_code: &str,
     fs_div: &str,
-) -> Result<DartStatementRes> {
+) -> Result<dart::StatementRes> {
     let Dart { key, url } = Settings::instance().dart.clone();
     let last_year = time::OffsetDateTime::now_utc().year() - 1;
     let req_url = reqwest::Url::parse(&url.statement).unwrap();
@@ -179,7 +183,7 @@ pub async fn get_statement(
         ])
         .send()
         .await?
-        .json::<DartStatementRes>()
+        .json::<dart::StatementRes>()
         .await?;
 
     // status 013 means data NOT_FOUND
@@ -195,7 +199,7 @@ pub async fn get_statement(
             ])
             .send()
             .await?
-            .json::<DartStatementRes>()
+            .json::<dart::StatementRes>()
             .await?;
     }
 
