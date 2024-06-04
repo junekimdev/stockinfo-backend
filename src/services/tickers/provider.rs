@@ -21,7 +21,7 @@ pub async fn build_ticker_db() -> Result<()> {
     // Store in DB
     const SQL_CLEAR: &str = "TRUNCATE TABLE ticker RESTART IDENTITY";
     const SQL_INSERT: &str =
-        "INSERT INTO ticker(cik_str, ticker, title) VALUES ($1::CHAR(10), $2::TEXT, $3::TEXT);";
+        "INSERT INTO ticker(cik_str, ticker, title) VALUES ($1::CHAR(10), $2::VARCHAR(10), $3::TEXT);";
 
     let mut db_client = db::pool().get().await?;
     let transaction = db_client.transaction().await?;
