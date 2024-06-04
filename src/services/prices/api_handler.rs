@@ -35,7 +35,7 @@ pub async fn handler_put(
 
 #[tracing::instrument(err)]
 #[actix_web::get("/prices/{short_code}/daily")]
-pub async fn handler_get_weekly(
+pub async fn handler_get_daily(
     req: actix_web::HttpRequest,
     short_code: actix_web::web::Path<String>,
 ) -> Result<actix_web::HttpResponse> {
@@ -51,7 +51,7 @@ pub async fn handler_get_weekly(
 
 #[tracing::instrument(err)]
 #[actix_web::get("/prices/{short_code}/weekly")]
-pub async fn handler_get_daily(
+pub async fn handler_get_weekly(
     req: actix_web::HttpRequest,
     short_code: actix_web::web::Path<String>,
 ) -> Result<actix_web::HttpResponse> {
