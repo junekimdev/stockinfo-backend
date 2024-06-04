@@ -75,6 +75,34 @@ CREATE TABLE price_weekly (
 CREATE TABLE ticker (
   id SERIAL PRIMARY KEY,
   cik_str CHAR(10),
-  ticker TEXT,
+  ticker VARCHAR(10),
   title TEXT
+);
+
+CREATE TABLE price_us (
+  id SERIAL PRIMARY KEY,
+  ticker VARCHAR(10),
+  date DATE,
+  open DECIMAL,
+  high DECIMAL,
+  low DECIMAL,
+  close DECIMAL,
+  adj_close DECIMAL,
+  volume DECIMAL,
+  UNIQUE(ticker, date)
+);
+
+CREATE TABLE price_us_weekly (
+  id SERIAL PRIMARY KEY,
+  ticker VARCHAR(10),
+  year INTEGER,
+  week INTEGER,
+  opening_date DATE,
+  closing_date DATE,
+  open DECIMAL,
+  high DECIMAL,
+  low DECIMAL,
+  close DECIMAL,
+  volume DECIMAL,
+  UNIQUE(ticker, year, week)
 );
