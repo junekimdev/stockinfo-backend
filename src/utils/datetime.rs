@@ -181,3 +181,40 @@ where
 {
     deserializer.deserialize_string(DateVisitor)
 }
+
+struct DateOptVisitor;
+
+impl<'de> serde::de::Visitor<'de> for DateOptVisitor {
+    type Value = Option<time::Date>;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            formatter,
+            "optional string in date format: YYYYMMDD | YYYY-MM-DD"
+        )
+    }
+
+    fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        // delegate deserializing to date_deserialize() and wrap the result with Some()
+        date_deserialize(deserializer).map(Some)
+    }
+
+    fn visit_none<E>(self) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(None)
+    }
+}
+
+#[allow(unused)]
+/// Deserialize Optional time::Date from string
+pub fn date_opt_deserialize<'de, D>(deserializer: D) -> Result<Option<time::Date>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    deserializer.deserialize_option(DateOptVisitor)
+}
