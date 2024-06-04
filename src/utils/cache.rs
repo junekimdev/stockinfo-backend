@@ -29,6 +29,18 @@ where
     Ok(res)
 }
 
+#[allow(unused)]
+#[tracing::instrument(err)]
+pub async fn set_with_timer<V, T>(k: &str, v: &V, seconds: u64) -> Result<T>
+where
+    V: ToRedisArgs + std::marker::Sync + std::fmt::Debug,
+    T: FromRedisValue,
+{
+    let mut conn = pool().get().await?;
+    let res = conn.set_ex::<&str, &V, T>(k, v, seconds).await?;
+    Ok(res)
+}
+
 #[tracing::instrument(err)]
 pub async fn get<T: FromRedisValue>(k: &str) -> Result<T> {
     let mut conn = pool().get().await?;
