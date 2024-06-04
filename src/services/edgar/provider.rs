@@ -3,8 +3,8 @@ use crate::utils::{settings::Settings, Result};
 
 pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
     let client = reqwest::Client::new();
-    let urls = Settings::instance().us_stock.url.clone();
-    let submission_url = format!("{}{}.json", urls.submissions, cik);
+    let urls = Settings::instance().urls.clone();
+    let submission_url = format!("{}{}.json", urls.us_submissions, cik);
     let req_url = reqwest::Url::parse(&submission_url).unwrap();
     let host = req_url.host_str().unwrap();
 

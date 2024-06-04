@@ -2,13 +2,7 @@ use crate::model::{
     StockDayPrice, StockDayPriceRes, StockPrice, StockPriceExistsRes, StockPriceItem,
     StockWeekPrice, StockWeeklyPriceRes,
 };
-use crate::utils::{
-    datetime::get_sunday_of_week,
-    db,
-    error::Error,
-    settings::{Govdata, Settings},
-    Result,
-};
+use crate::utils::{datetime::get_sunday_of_week, db, error::Error, settings::Settings, Result};
 use rust_decimal::prelude::*;
 
 type WeeklyPriceHashMap = std::collections::HashMap<(i32, u8), Vec<StockPriceItem>>;
@@ -45,6 +39,14 @@ pub async fn update_price_db(stock_code: &str) -> Result<()> {
 
     // Update DB
     update_weekly_price_db(map).await
+}
+
+// TODO get latest psuedo-real-time price
+#[tracing::instrument(err)]
+pub async fn get_price_latest(stock_code: &str) -> Result<()> {
+    // TODO Fetch data from internet
+    // TODO Filter data to find price for the company
+    Ok(())
 }
 
 #[tracing::instrument(err)]
@@ -119,10 +121,11 @@ async fn update_prices_web(
     date_from: Option<time::Date>,
 ) -> Result<Vec<StockPriceItem>> {
     let web_client = reqwest::Client::new();
-    let Govdata { key, url } = Settings::instance().govdata.clone();
+    let url = Settings::instance().urls.kr_price.clone();
+    let key = Settings::instance().keys.data_go_kr.clone();
 
     // Get all prices
-    let mut req = web_client.get(url.price);
+    let mut req = web_client.get(url);
     if let Some(from) = date_from {
         let date_format = time::macros::format_description!("[year][month][day]");
         req = req.query(&[

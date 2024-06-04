@@ -3,8 +3,8 @@ use crate::utils::{db, error::Error, settings::Settings, Result};
 
 #[tracing::instrument(err)]
 pub async fn build_ticker_db() -> Result<()> {
-    let url = Settings::instance().us_stock.url.clone();
-    let req_url = reqwest::Url::parse(&url.ticker).unwrap();
+    let url = Settings::instance().urls.us_ticker.clone();
+    let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
 
     // Get all codes

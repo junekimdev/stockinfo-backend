@@ -1,20 +1,15 @@
 use crate::model::dart;
-use crate::utils::{
-    datetime::parse_date_from,
-    db,
-    error::Error,
-    settings::{Dart, Settings},
-    Result,
-};
+use crate::utils::{datetime::parse_date_from, db, error::Error, settings::Settings, Result};
 use std::io::Read;
 
 #[tracing::instrument(err)]
 pub async fn build_code_db() -> Result<()> {
-    let Dart { key, url } = Settings::instance().dart.clone();
+    let key = Settings::instance().keys.dart.clone();
+    let url = Settings::instance().urls.dart_code.clone();
 
     // Get a file from the internet
     let res = tokio::task::spawn_blocking(move || {
-        let req_url = reqwest::Url::parse(&url.code).unwrap();
+        let req_url = reqwest::Url::parse(&url).unwrap();
         let host = req_url.host_str().unwrap();
         let mut buf: Vec<u8> = Vec::new();
         reqwest::blocking::Client::new()
@@ -109,9 +104,10 @@ pub async fn get_index(
     report_code: &str,
     idx_code: &str,
 ) -> Result<dart::IndexRes> {
-    let Dart { key, url } = Settings::instance().dart.clone();
     let last_year = time::OffsetDateTime::now_utc().year() - 1;
-    let req_url = reqwest::Url::parse(&url.index).unwrap();
+    let key = Settings::instance().keys.dart.clone();
+    let url = Settings::instance().urls.dart_index.clone();
+    let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
 
     let req_base = reqwest::Client::new()
@@ -160,9 +156,10 @@ pub async fn get_statement(
     report_code: &str,
     fs_div: &str,
 ) -> Result<dart::StatementRes> {
-    let Dart { key, url } = Settings::instance().dart.clone();
     let last_year = time::OffsetDateTime::now_utc().year() - 1;
-    let req_url = reqwest::Url::parse(&url.statement).unwrap();
+    let key = Settings::instance().keys.dart.clone();
+    let url = Settings::instance().urls.dart_statement.clone();
+    let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
 
     let req_base = reqwest::Client::new()

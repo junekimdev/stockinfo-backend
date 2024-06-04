@@ -1,15 +1,11 @@
 use crate::model::{StockCompany, StockCompanySearchRes};
-use crate::utils::{
-    db,
-    error::Error,
-    settings::{Govdata, Settings},
-    Result,
-};
+use crate::utils::{db, error::Error, settings::Settings, Result};
 
 #[tracing::instrument(err)]
 pub async fn build_company_db() -> Result<()> {
     let web_client = reqwest::Client::new();
-    let Govdata { key, url } = Settings::instance().govdata.clone();
+    let url = Settings::instance().urls.kr_company.clone();
+    let key = Settings::instance().keys.data_go_kr.clone();
     let format = time::macros::format_description!("[year][month][day]");
     let mut base_date = time::OffsetDateTime::now_utc()
         .date()
@@ -18,7 +14,7 @@ pub async fn build_company_db() -> Result<()> {
 
     // Get all codes
     let mut res = web_client
-        .get(&url.company)
+        .get(&url)
         .header(reqwest::header::ACCEPT_CHARSET, "utf-8")
         .query(&[
             ("serviceKey", key.as_str()),
@@ -36,7 +32,7 @@ pub async fn build_company_db() -> Result<()> {
         base_date = base_date.previous_day().unwrap();
 
         res = web_client
-            .get(&url.company)
+            .get(&url)
             .header(reqwest::header::ACCEPT_CHARSET, "utf-8")
             .query(&[
                 ("serviceKey", key.as_str()),

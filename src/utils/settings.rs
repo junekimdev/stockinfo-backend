@@ -24,22 +24,10 @@ pub struct GovdataUrl {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct Govdata {
-    pub key: String,
-    pub url: GovdataUrl,
-}
-
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct DartUrl {
     pub statement: String,
     pub index: String,
     pub code: String,
-}
-
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct Dart {
-    pub key: String,
-    pub url: DartUrl,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -51,8 +39,22 @@ pub struct UsStockUrl {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct UsStock {
-    pub url: UsStockUrl,
+pub struct Keys {
+    pub data_go_kr: String,
+    pub dart: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct Urls {
+    pub kr_price: String,
+    pub kr_company: String,
+    pub us_ticker: String,
+    pub us_submissions: String,
+    pub us_price: String,
+    pub dart_statement: String,
+    pub dart_index: String,
+    pub dart_code: String,
+    pub edgar: String,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -62,9 +64,8 @@ pub struct Settings {
     pub cors: Cors,
     pub pg: deadpool_postgres::Config,
     pub redis: deadpool_redis::Config,
-    pub govdata: Govdata,
-    pub dart: Dart,
-    pub us_stock: UsStock,
+    pub keys: Keys,
+    pub urls: Urls,
 }
 
 static SETTINGS: std::sync::OnceLock<Settings> = std::sync::OnceLock::new();
