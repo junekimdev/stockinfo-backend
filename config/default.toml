@@ -38,5 +38,6 @@ code = "https://opendart.fss.or.kr/api/corpCode.xml"
 
 [us_stock.url]
 ticker = "https://www.sec.gov/files/company_tickers.json"
-edgar = "https://www.sec.gov/edgar/browse/"
+submissions = "https://data.sec.gov/submissions/CIK"
+edgar = "https://www.sec.gov/Archives/edgar/data"
 price = "https://query1.finance.yahoo.com/v7/finance/download"

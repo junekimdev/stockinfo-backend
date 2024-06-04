@@ -45,6 +45,7 @@ pub struct Dart {
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct UsStockUrl {
     pub ticker: String,
+    pub submissions: String,
     pub edgar: String,
     pub price: String,
 }
