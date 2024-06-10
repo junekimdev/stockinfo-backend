@@ -28,6 +28,7 @@ dart = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 [urls]
 kr_price = "https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo"
 kr_company = "https://apis.data.go.kr/1160100/service/GetKrxListedInfoService/getItemInfo"
+kr_krx_price = "http://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd"
 us_ticker = "https://www.sec.gov/files/company_tickers.json"
 us_submissions = "https://data.sec.gov/submissions/CIK"
 us_price = "https://query1.finance.yahoo.com/v7/finance/download"
