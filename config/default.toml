@@ -21,23 +21,18 @@ pool = { max_size = 16, timeouts.wait = { secs = 5, nanos = 0 }}
 url = "redis://localhost:6379"
 pool = { max_size = 10, timeouts.wait = { secs = 2, nanos = 0 }}
 
-[govdata]
-key = "key"
+[keys]
+data_go_kr = "key"
+dart = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-[govdata.url]
-price = "https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo"
-company = "https://apis.data.go.kr/1160100/service/GetKrxListedInfoService/getItemInfo"
-
-[dart]
-key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-[dart.url]
-statement = "https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json"
-index = "https://opendart.fss.or.kr/api/fnlttSinglIndx.json"
-code = "https://opendart.fss.or.kr/api/corpCode.xml"
-
-[us_stock.url]
-ticker = "https://www.sec.gov/files/company_tickers.json"
-submissions = "https://data.sec.gov/submissions/CIK"
+[urls]
+kr_price = "https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo"
+kr_company = "https://apis.data.go.kr/1160100/service/GetKrxListedInfoService/getItemInfo"
+kr_krx_price = "http://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd"
+us_ticker = "https://www.sec.gov/files/company_tickers.json"
+us_submissions = "https://data.sec.gov/submissions/CIK"
+us_price = "https://query1.finance.yahoo.com/v7/finance/download"
+dart_statement = "https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json"
+dart_index = "https://opendart.fss.or.kr/api/fnlttSinglIndx.json"
+dart_code = "https://opendart.fss.or.kr/api/corpCode.xml"
 edgar = "https://www.sec.gov/Archives/edgar/data"
-price = "https://query1.finance.yahoo.com/v7/finance/download"

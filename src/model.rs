@@ -1,11 +1,13 @@
 pub mod dart;
 pub mod edgar;
 mod error;
+pub mod krx;
 mod res_body;
 mod stock_company;
 mod stock_price;
 mod stock_price_us;
 mod ticker;
+pub mod web;
 pub mod xbrl;
 
 pub use error::*;

@@ -1,13 +1,9 @@
 use crate::model::{
-    StockDayPrice, StockDayPriceRes, StockPrice, StockPriceExistsRes, StockPriceItem,
+    krx, web, StockDayPrice, StockDayPriceRes, StockPrice, StockPriceExistsRes, StockPriceItem,
     StockWeekPrice, StockWeeklyPriceRes,
 };
 use crate::utils::{
-    datetime::get_sunday_of_week,
-    db,
-    error::Error,
-    settings::{Govdata, Settings},
-    Result,
+    cache, datetime::get_sunday_of_week, db, error::Error, settings::Settings, Result,
 };
 use rust_decimal::prelude::*;
 
@@ -45,6 +41,38 @@ pub async fn update_price_db(stock_code: &str) -> Result<()> {
 
     // Update DB
     update_weekly_price_db(map).await
+}
+
+#[tracing::instrument(err)]
+pub async fn get_price_latest(stock_code: &str) -> Result<krx::ResBody> {
+    let cache_key = "dbms/MDC/STAT/standard/MDCSTAT01501";
+    let cache_time = 600; // 10 minutes
+
+    // Check cache first
+    let res = match cache::get::<Option<krx::ResBody>>(cache_key).await? {
+        Some(data) => data,
+        None => {
+            // Fetch current price data of all companies in krx
+            let data = fetch_krx_prices_all().await?;
+
+            // Save data in cache
+            cache::set_with_timer(cache_key, &data, cache_time).await?;
+
+            data
+        }
+    };
+
+    // Filter data to find price for the company
+    let prices: Vec<krx::Price> = res
+        .prices
+        .into_iter()
+        .filter(|v| v.isu_srt_cd == stock_code)
+        .collect();
+
+    Ok(krx::ResBody {
+        current_datetime: res.current_datetime,
+        prices,
+    })
 }
 
 #[tracing::instrument(err)]
@@ -114,15 +142,53 @@ pub async fn clear_prices() -> Result<()> {
 }
 
 #[tracing::instrument(err)]
+async fn fetch_krx_prices_all() -> Result<krx::ResBody> {
+    let url = Settings::instance().urls.kr_krx_price.clone();
+    let req_url = reqwest::Url::parse(&url).unwrap();
+    let host = req_url.host_str().unwrap();
+    let format_date = time::macros::format_description!("[year][month][day]");
+    let now = time::OffsetDateTime::now_utc();
+
+    // Fetch data from internet
+    let res = reqwest::Client::new()
+        .get(req_url.clone())
+        .header(reqwest::header::HOST, host)
+        .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+        .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
+        .query(&[
+            ("bld", "dbms/MDC/STAT/standard/MDCSTAT01501"),
+            ("locale", "ko_KR"),
+            ("mktId", "ALL"),
+            ("share", "1"),
+            ("money", "1"),
+            ("csvxls_isNo", "false"),
+            ("trdDd", now.date().format(&format_date)?.as_str()),
+        ])
+        .send()
+        .await?
+        .json::<web::krx::ResBody>()
+        .await?;
+
+    Ok(krx::ResBody::from(res))
+}
+
+#[tracing::instrument(err)]
 async fn update_prices_web(
     stock_code: &str,
     date_from: Option<time::Date>,
 ) -> Result<Vec<StockPriceItem>> {
-    let web_client = reqwest::Client::new();
-    let Govdata { key, url } = Settings::instance().govdata.clone();
+    let key = Settings::instance().keys.data_go_kr.clone();
+    let url = Settings::instance().urls.kr_price.clone();
+    let req_url = reqwest::Url::parse(&url).unwrap();
+    let host = req_url.host_str().unwrap();
 
     // Get all prices
-    let mut req = web_client.get(url.price);
+    let mut req = reqwest::Client::new()
+        .get(req_url.clone())
+        .header(reqwest::header::HOST, host)
+        .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+        .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8");
+
     if let Some(from) = date_from {
         let date_format = time::macros::format_description!("[year][month][day]");
         req = req.query(&[

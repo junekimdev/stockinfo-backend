@@ -120,7 +120,7 @@ async fn update_prices_web(
     ticker: &str,
     date_from: Option<time::Date>,
 ) -> Result<Vec<StockPriceUS>> {
-    let url = Settings::instance().us_stock.url.price.clone() + "/" + ticker;
+    let url = Settings::instance().urls.us_price.clone() + "/" + ticker;
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
     let now = format!("{}", get_timestamp(std::time::SystemTime::now())?);

@@ -34,6 +34,22 @@ pub async fn handler_put(
 }
 
 #[tracing::instrument(err)]
+#[actix_web::get("/prices/{short_code}/latest")]
+pub async fn handler_get_latest(
+    req: actix_web::HttpRequest,
+    short_code: actix_web::web::Path<String>,
+) -> Result<actix_web::HttpResponse> {
+    if short_code.len() != 6 {
+        return Err(Error::E400BadRequest("invalid short_code".into()));
+    }
+
+    let res = provider::get_price_latest(&short_code).await?;
+
+    // Return result
+    Ok(actix_web::HttpResponse::Ok().json(res))
+}
+
+#[tracing::instrument(err)]
 #[actix_web::get("/prices/{short_code}/daily")]
 pub async fn handler_get_daily(
     req: actix_web::HttpRequest,

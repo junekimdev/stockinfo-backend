@@ -157,19 +157,7 @@ impl<'de> serde::de::Visitor<'de> for DateVisitor {
     where
         E: serde::de::Error,
     {
-        let format1 = time::macros::format_description!("[year][month][day]");
-        let format2 = time::macros::format_description!("[year]-[month]-[day]");
-        match time::Date::parse(&v, &format1) {
-            Ok(d1) => Ok(d1),
-            Err(e1) => match time::Date::parse(&v, &format2) {
-                Ok(d2) => Ok(d2),
-                Err(e2) => Err(E::custom(format!(
-                    "{} | {}",
-                    &e1.to_string(),
-                    &e2.to_string()
-                ))),
-            },
-        }
+        self.visit_str(&v)
     }
 }
 
@@ -217,4 +205,56 @@ where
     D: serde::Deserializer<'de>,
 {
     deserializer.deserialize_option(DateOptVisitor)
+}
+
+//==================== KRX Datetime Serialize/Deserialize ====================
+
+struct KrxDatetimeVisitor;
+
+impl<'de> serde::de::Visitor<'de> for KrxDatetimeVisitor {
+    type Value = time::OffsetDateTime;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(formatter, "string in date format: YYYYMMDD | YYYY-MM-DD")
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        let format_date = time::macros::format_description!("[year].[month].[day]");
+        let format_time = time::macros::format_description!("[hour]:[minute]:[second]");
+        let mut dt = v.split_ascii_whitespace();
+        let date = dt
+            .next()
+            .map(|s| time::Date::parse(s, &format_date).unwrap())
+            .unwrap();
+        let is_pm = dt.next().map(|s| s == "PM").unwrap();
+        let mut time = dt
+            .next()
+            .map(|s| time::Time::parse(s, &format_time).unwrap())
+            .unwrap();
+        if is_pm {
+            time += time::Duration::hours(12);
+        }
+        let current_datetime =
+            time::OffsetDateTime::new_in_offset(date, time, time::macros::offset!(+9:00:00));
+        Ok(current_datetime)
+    }
+
+    fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        self.visit_str(&v)
+    }
+}
+
+#[allow(unused)]
+/// Deserialize time::OffsetDateTime from KRX datetime string
+pub fn krx_datetime_deserialize<'de, D>(deserializer: D) -> Result<time::OffsetDateTime, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    deserializer.deserialize_string(KrxDatetimeVisitor)
 }
