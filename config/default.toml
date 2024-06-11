@@ -5,6 +5,10 @@ port = 4000
 [jaeger]
 agent_endpoint = "http://localhost:4317"
 
+[agent]
+common = "StockinfoRuntime"
+sec_gov = "webmaster@my-domain.com"
+
 [cors]
 origins = ["localhost:4000"]
 allow_all_subdomains_of = ["localhost"]
