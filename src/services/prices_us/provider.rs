@@ -120,6 +120,7 @@ async fn update_prices_web(
     ticker: &str,
     date_from: Option<time::Date>,
 ) -> Result<Vec<StockPriceUS>> {
+    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let url = Settings::instance().urls.us_price.clone() + "/" + ticker;
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
@@ -129,7 +130,7 @@ async fn update_prices_web(
     let res = reqwest::Client::new()
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+        .header(reqwest::header::USER_AGENT, agent)
         .header(reqwest::header::ACCEPT, "text/csv;charset=UTF-8")
         .query(&[
             ("period1", "1577836800"), // 2020-01-01

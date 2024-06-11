@@ -3,6 +3,7 @@ use crate::utils::{db, error::Error, settings::Settings, Result};
 
 #[tracing::instrument(err)]
 pub async fn build_ticker_db() -> Result<()> {
+    let agent = Settings::instance().agent.sec_gov.clone();
     let url = Settings::instance().urls.us_ticker.clone();
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
@@ -11,7 +12,7 @@ pub async fn build_ticker_db() -> Result<()> {
     let res = reqwest::Client::new()
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+        .header(reqwest::header::USER_AGENT, &agent)
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
         .send()
         .await?

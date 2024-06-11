@@ -30,10 +30,6 @@
   POSTGRES_DB=stockinfo
   POSTGRES_PASSWORD=super-secret-password
   POSTGRES_INITDB_ARGS="--encoding=UTF-8 --lc-collate=C --lc-ctype=en_US.UTF-8"
-
-  REDIS_USERNAME=stockinfo
-  REDIS_PASSWORD=super-secret-password
-  REDIS_DISABLE_DEFAULT_USER="true"
   ```
 
 - Add a file `production.toml` under `/config` by modifying `default.toml` with proper values
@@ -43,6 +39,14 @@
 - Build docker image by running `make` in your terminal
 
 - Or, Run `cargo build`
+
+### Initial DB Build
+
+  ```shell
+  curl -X POST <URL_API>/v1/companies
+  curl -X POST <URL_API>/v1/dart/code
+  curl -X POST <URL_API>/v1/tickers
+  ```
 
 ## Authors
 

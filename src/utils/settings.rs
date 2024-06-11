@@ -12,6 +12,12 @@ pub struct Jaeger {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct Agent {
+    pub common: String,
+    pub sec_gov: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Cors {
     pub origins: Option<Vec<String>>,
     pub allow_all_subdomains_of: Option<Vec<String>>,
@@ -62,6 +68,7 @@ pub struct Urls {
 pub struct Settings {
     pub server: Server,
     pub jaeger: Jaeger,
+    pub agent: Agent,
     pub cors: Cors,
     pub pg: deadpool_postgres::Config,
     pub redis: deadpool_redis::Config,
