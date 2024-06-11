@@ -1,4 +1,3 @@
-use crate::utils::datetime::parse_date_from;
 use std::collections::HashMap;
 
 #[allow(unused)]
@@ -232,6 +231,13 @@ pub struct Period {
     pub end_date: Option<time::Date>,
 }
 
+impl Period {
+    pub fn parse_date_from(d: &str) -> std::result::Result<time::Date, time::error::Parse> {
+        let format = time::macros::format_description!("[year]-[month]-[day]");
+        time::Date::parse(d, &format)
+    }
+}
+
 impl From<roxmltree::Node<'_, '_>> for Period {
     fn from(value: roxmltree::Node) -> Self {
         let mut date: Option<time::Date> = None;
@@ -246,9 +252,9 @@ impl From<roxmltree::Node<'_, '_>> for Period {
             let tag = child.tag_name().name();
             let val = child.text().unwrap();
             match tag {
-                "instant" => date = Some(parse_date_from(val).unwrap()),
-                "startDate" => start_date = Some(parse_date_from(val).unwrap()),
-                "endDate" => end_date = Some(parse_date_from(val).unwrap()),
+                "instant" => date = Some(Self::parse_date_from(val).unwrap()),
+                "startDate" => start_date = Some(Self::parse_date_from(val).unwrap()),
+                "endDate" => end_date = Some(Self::parse_date_from(val).unwrap()),
                 _ => (),
             }
         }
