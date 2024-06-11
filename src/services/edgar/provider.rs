@@ -3,6 +3,7 @@ use crate::utils::{settings::Settings, Result};
 
 pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
     let client = reqwest::Client::new();
+    let agent = Settings::instance().agent.sec_gov.clone();
     let urls = Settings::instance().urls.clone();
     let submission_url = format!("{}{}.json", urls.us_submissions, cik);
     let req_url = reqwest::Url::parse(&submission_url).unwrap();
@@ -12,7 +13,7 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
     let res = client
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+        .header(reqwest::header::USER_AGENT, &agent)
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
         .send()
         .await?
@@ -43,7 +44,7 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
     let res = client
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+        .header(reqwest::header::USER_AGENT, &agent)
         .header(reqwest::header::ACCEPT, "application/xml;charset=UTF-8")
         .send()
         .await?
