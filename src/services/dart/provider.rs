@@ -4,6 +4,7 @@ use std::io::Read;
 
 #[tracing::instrument(err)]
 pub async fn build_code_db() -> Result<()> {
+    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let key = Settings::instance().keys.dart.clone();
     let url = Settings::instance().urls.dart_code.clone();
 
@@ -15,7 +16,7 @@ pub async fn build_code_db() -> Result<()> {
         reqwest::blocking::Client::new()
             .get(req_url.clone())
             .header(reqwest::header::HOST, host)
-            .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+            .header(reqwest::header::USER_AGENT, agent)
             .header(reqwest::header::ACCEPT, "application/xml;charset=UTF-8")
             .query(&[("crtfc_key", key.as_str())])
             .send()
@@ -105,6 +106,7 @@ pub async fn get_index(
     idx_code: &str,
 ) -> Result<dart::IndexRes> {
     let last_year = time::OffsetDateTime::now_utc().year() - 1;
+    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let key = Settings::instance().keys.dart.clone();
     let url = Settings::instance().urls.dart_index.clone();
     let req_url = reqwest::Url::parse(&url).unwrap();
@@ -113,7 +115,7 @@ pub async fn get_index(
     let req_base = reqwest::Client::new()
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+        .header(reqwest::header::USER_AGENT, agent)
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8");
 
     let mut res = req_base
@@ -157,6 +159,7 @@ pub async fn get_statement(
     fs_div: &str,
 ) -> Result<dart::StatementRes> {
     let last_year = time::OffsetDateTime::now_utc().year() - 1;
+    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let key = Settings::instance().keys.dart.clone();
     let url = Settings::instance().urls.dart_statement.clone();
     let req_url = reqwest::Url::parse(&url).unwrap();
@@ -165,7 +168,7 @@ pub async fn get_statement(
     let req_base = reqwest::Client::new()
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+        .header(reqwest::header::USER_AGENT, agent)
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8");
 
     let mut res = req_base

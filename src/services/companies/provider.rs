@@ -4,6 +4,7 @@ use crate::utils::{db, error::Error, settings::Settings, Result};
 #[tracing::instrument(err)]
 pub async fn build_company_db() -> Result<()> {
     let web_client = reqwest::Client::new();
+    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let key = Settings::instance().keys.data_go_kr.clone();
     let url = Settings::instance().urls.kr_company.clone();
     let req_url = reqwest::Url::parse(&url).unwrap();
@@ -18,7 +19,7 @@ pub async fn build_company_db() -> Result<()> {
     let mut res = web_client
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+        .header(reqwest::header::USER_AGENT, agent.clone())
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
         .query(&[
             ("serviceKey", key.as_str()),
@@ -38,7 +39,7 @@ pub async fn build_company_db() -> Result<()> {
         res = web_client
             .get(req_url.clone())
             .header(reqwest::header::HOST, host)
-            .header(reqwest::header::USER_AGENT, "StockinfoRuntime/1.0.0")
+            .header(reqwest::header::USER_AGENT, agent.clone())
             .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
             .query(&[
                 ("serviceKey", key.as_str()),
