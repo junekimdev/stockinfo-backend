@@ -156,6 +156,7 @@ pub struct StockUSDayPrice {
     pub high: rust_decimal::Decimal,
     pub low: rust_decimal::Decimal,
     pub close: rust_decimal::Decimal,
+    pub adj_close: rust_decimal::Decimal,
     pub volume: rust_decimal::Decimal,
 }
 
@@ -167,6 +168,7 @@ impl From<&tokio_postgres::Row> for StockUSDayPrice {
             high: value.get("high"),
             low: value.get("low"),
             close: value.get("close"),
+            adj_close: value.get("adj_close"),
             volume: value.get("volume"),
         }
     }
