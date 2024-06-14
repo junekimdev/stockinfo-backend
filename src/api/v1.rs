@@ -2,6 +2,7 @@ pub fn build() -> actix_web::Scope {
     actix_web::web::scope("/v1")
         .service(crate::services::prices_us::handler_post)
         .service(crate::services::prices_us::handler_put)
+        .service(crate::services::prices_us::handler_get_latest)
         .service(crate::services::prices_us::handler_get_daily)
         .service(crate::services::prices_us::handler_get_weekly)
         .service(crate::services::prices_us::handler_get_exists)

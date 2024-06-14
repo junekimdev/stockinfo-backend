@@ -3,15 +3,10 @@ use rust_decimal::prelude::*;
 use std::io::BufRead;
 
 use crate::model::{
-    StockPriceUS, StockUSDayPrice, StockUSDayPriceRes, StockUSPriceExistsRes, StockUSWeekPrice,
+    StockPriceUS, StockUSDayPriceRes, StockUSPriceExistsRes, StockUSWeekPrice,
     StockUSWeeklyPriceRes,
 };
-use crate::utils::{
-    datetime::{get_sunday_of_week, get_timestamp},
-    db,
-    settings::Settings,
-    Result,
-};
+use crate::utils::{datetime::get_sunday_of_week, db, settings::Settings, Result};
 
 type WeeklyPriceHashMap = std::collections::HashMap<(i32, u8), Vec<StockPriceUS>>;
 
@@ -50,6 +45,51 @@ pub async fn update_price_db(ticker: &str) -> Result<()> {
 }
 
 #[tracing::instrument(err)]
+pub async fn get_price_latest(ticker: &str) -> Result<StockUSDayPriceRes> {
+    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
+    let url = Settings::instance().urls.us_price.clone() + "/" + ticker;
+    let req_url = reqwest::Url::parse(&url).unwrap();
+    let host = req_url.host_str().unwrap();
+    let prev_day = time::OffsetDateTime::now_utc()
+        .saturating_sub(time::Duration::DAY)
+        .unix_timestamp()
+        .to_string();
+    let now = time::OffsetDateTime::now_utc().unix_timestamp().to_string();
+
+    // Get all codes
+    let res = reqwest::Client::new()
+        .get(req_url.clone())
+        .header(reqwest::header::HOST, host)
+        .header(reqwest::header::USER_AGENT, agent)
+        .header(reqwest::header::ACCEPT, "text/csv;charset=UTF-8")
+        .query(&[
+            ("period1", prev_day.as_str()),
+            ("period2", now.as_str()),
+            ("interval", "1d"),
+            ("events", "history"),
+            ("includeAdjustedClose", "true"),
+        ])
+        .send()
+        .await?
+        .bytes()
+        .await?;
+
+    let mut prices: Vec<StockPriceUS> = Vec::new();
+    let mut lines = res.reader().lines();
+    let _header = lines.next(); // throw away headers
+
+    for line in lines.map_while(std::io::Result::ok) {
+        let vec: Vec<&str> = line.split(',').collect();
+        prices.push(StockPriceUS::from(vec));
+    }
+
+    Ok(StockUSDayPriceRes {
+        ticker: ticker.to_string(),
+        prices,
+    })
+}
+
+#[tracing::instrument(err)]
 pub async fn get_price_daily(ticker: &str) -> Result<StockUSDayPriceRes> {
     const SQL: &str =
         "SELECT * from price_us WHERE ticker=$1::CHAR(6) ORDER BY date DESC LIMIT 400;";
@@ -62,7 +102,7 @@ pub async fn get_price_daily(ticker: &str) -> Result<StockUSDayPriceRes> {
 
     let res = rows
         .into_iter()
-        .map(|row| StockUSDayPrice::from(&row))
+        .map(|row| StockPriceUS::from(&row))
         .collect();
 
     Ok(StockUSDayPriceRes {
@@ -124,7 +164,12 @@ async fn update_prices_web(
     let url = Settings::instance().urls.us_price.clone() + "/" + ticker;
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
-    let now = format!("{}", get_timestamp(std::time::SystemTime::now())?);
+    let prev_day = time::OffsetDateTime::now_utc()
+        .to_offset(time::macros::offset!(-5)) // Use EST timezone; MIDNIGHT in EST comes later than in EDT
+        .replace_time(time::Time::MIDNIGHT)
+        .saturating_sub(time::Duration::SECOND)
+        .unix_timestamp()
+        .to_string();
 
     // Get all codes
     let res = reqwest::Client::new()
@@ -134,7 +179,7 @@ async fn update_prices_web(
         .header(reqwest::header::ACCEPT, "text/csv;charset=UTF-8")
         .query(&[
             ("period1", "1577836800"), // 2020-01-01
-            ("period2", &now),
+            ("period2", &prev_day),
             ("interval", "1d"),
             ("events", "history"),
             ("includeAdjustedClose", "true"),

@@ -34,6 +34,22 @@ pub async fn handler_put(
 }
 
 #[tracing::instrument(err)]
+#[actix_web::get("/prices_us/{ticker}/latest")]
+pub async fn handler_get_latest(
+    req: actix_web::HttpRequest,
+    ticker: actix_web::web::Path<String>,
+) -> Result<actix_web::HttpResponse> {
+    if ticker.is_empty() {
+        return Err(Error::E400BadRequest("invalid ticker".into()));
+    }
+
+    let res = provider::get_price_latest(&ticker).await?;
+
+    // Return result
+    Ok(actix_web::HttpResponse::Ok().json(res))
+}
+
+#[tracing::instrument(err)]
 #[actix_web::get("/prices_us/{ticker}/daily")]
 pub async fn handler_get_daily(
     req: actix_web::HttpRequest,
