@@ -145,33 +145,7 @@ impl From<&tokio_postgres::Row> for StockUSWeekPrice {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct StockUSDayPriceRes {
     pub ticker: String,
-    pub prices: Vec<StockUSDayPrice>,
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub struct StockUSDayPrice {
-    #[serde(serialize_with = "date_serialize")]
-    pub date: time::Date,
-    pub open: rust_decimal::Decimal,
-    pub high: rust_decimal::Decimal,
-    pub low: rust_decimal::Decimal,
-    pub close: rust_decimal::Decimal,
-    pub adj_close: rust_decimal::Decimal,
-    pub volume: rust_decimal::Decimal,
-}
-
-impl From<&tokio_postgres::Row> for StockUSDayPrice {
-    fn from(value: &tokio_postgres::Row) -> Self {
-        Self {
-            date: value.get("date"),
-            open: value.get("open"),
-            high: value.get("high"),
-            low: value.get("low"),
-            close: value.get("close"),
-            adj_close: value.get("adj_close"),
-            volume: value.get("volume"),
-        }
-    }
+    pub prices: Vec<super::StockPriceUS>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

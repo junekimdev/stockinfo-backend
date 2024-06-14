@@ -40,6 +40,7 @@ pub struct SubmissionsRecent {
 pub struct StatementRes {
     pub cik: String,
     pub outstanding_stock: Vec<StatementItem>,
+    pub assets: Vec<StatementItem>,
     pub equity: Vec<StatementItem>,
     pub liabilities: Vec<StatementItem>,
     pub revenue: Vec<StatementItem>,
