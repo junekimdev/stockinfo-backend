@@ -59,6 +59,11 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
+    let assets = xbrl::Group::extract(&doc, "Assets")
+        .to_vec_date_and_value()
+        .into_iter()
+        .map(edgar::StatementItem::from)
+        .collect::<Vec<edgar::StatementItem>>();
     let equity = xbrl::Group::extract(&doc, "StockholdersEquity")
         .to_vec_date_and_value()
         .into_iter()
@@ -94,6 +99,7 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
     Ok(edgar::StatementRes {
         cik: cik.to_string(),
         outstanding_stock,
+        assets,
         equity,
         liabilities,
         revenue,
