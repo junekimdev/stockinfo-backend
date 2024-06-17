@@ -74,11 +74,18 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
-    let revenue = xbrl::Group::extract(&doc, "RevenueFromContractWithCustomerExcludingAssessedTax")
+    let mut revenue = xbrl::Group::extract(&doc, "Revenues")
         .to_vec_date_and_value()
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
+    if revenue.is_empty() {
+        revenue = xbrl::Group::extract(&doc, "RevenueFromContractWithCustomerExcludingAssessedTax")
+            .to_vec_date_and_value()
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
     let operating_income = xbrl::Group::extract(&doc, "OperatingIncomeLoss")
         .to_vec_date_and_value()
         .into_iter()
