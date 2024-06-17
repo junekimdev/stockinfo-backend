@@ -50,8 +50,8 @@ pub async fn get_price_latest(ticker: &str) -> Result<StockUSDayPriceRes> {
     let url = Settings::instance().urls.us_price.clone() + "/" + ticker;
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
-    let prev_day = time::OffsetDateTime::now_utc()
-        .saturating_sub(time::Duration::DAY)
+    let prev_week = time::OffsetDateTime::now_utc()
+        .saturating_sub(time::Duration::WEEK)
         .unix_timestamp()
         .to_string();
     let now = time::OffsetDateTime::now_utc().unix_timestamp().to_string();
@@ -63,7 +63,7 @@ pub async fn get_price_latest(ticker: &str) -> Result<StockUSDayPriceRes> {
         .header(reqwest::header::USER_AGENT, agent)
         .header(reqwest::header::ACCEPT, "text/csv;charset=UTF-8")
         .query(&[
-            ("period1", prev_day.as_str()),
+            ("period1", prev_week.as_str()),
             ("period2", now.as_str()),
             ("interval", "1d"),
             ("events", "history"),
