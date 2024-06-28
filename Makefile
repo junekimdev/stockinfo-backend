@@ -15,7 +15,8 @@ update:
 	@if [ -d .git ];	then \
 		git fetch --all \
 		&& git reset --hard origin/master \
-		&& chmod +x ./clear_prices.sh; \
+		&& chmod +x ./clear_prices_kr.sh \
+		&& chmod +x ./clear_prices_us.sh; \
 	else \
 		echo "Git repo does not exist. Clone it first."; \
 	fi
