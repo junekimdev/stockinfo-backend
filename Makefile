@@ -3,7 +3,7 @@
 all: build
 
 NAME=stockinfo-backend
-TAG=1.1.5
+TAG=1.1.6
 
 build:
 	docker build \
