@@ -3,7 +3,7 @@
 all: build
 
 NAME=stockinfo-backend
-TAG=1.1.5
+TAG=1.1.6
 
 build:
 	docker build \
@@ -14,9 +14,7 @@ build:
 update:
 	@if [ -d .git ];	then \
 		git fetch --all \
-		&& git reset --hard origin/master \
-		&& chmod +x ./clear_prices_kr.sh \
-		&& chmod +x ./clear_prices_us.sh; \
+		&& git reset --hard origin/master; \
 	else \
 		echo "Git repo does not exist. Clone it first."; \
 	fi

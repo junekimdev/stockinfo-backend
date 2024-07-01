@@ -23,7 +23,7 @@ services:
       - .env
 
   backend:
-    image: ghcr.io/junekimdev/stockinfo-backend:1.1.5
+    image: ghcr.io/junekimdev/stockinfo-backend:1.1.6
     restart: unless-stopped
     env_file:
       - .env
