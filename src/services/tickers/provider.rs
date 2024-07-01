@@ -44,7 +44,7 @@ pub async fn build_ticker_db() -> Result<()> {
 
 #[tracing::instrument]
 pub async fn get_ticker(search_word: &str) -> Result<Vec<Ticker>> {
-    const SQL: &str = "SELECT * FROM ticker WHERE title ILIKE $1;";
+    const SQL: &str = "SELECT * FROM ticker WHERE title ILIKE $1 OR ticker ILIKE $1;";
 
     let word = format!("%{}%", search_word);
 
