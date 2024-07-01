@@ -1,7 +1,7 @@
 # based on latest rust bookworm image
 FROM rust:bookworm
 
-LABEL maintainer="June Kim" version="1.1"
+LABEL org.opencontainers.image.authors="godlyjune@gmail.com"
 
 RUN apt-get update \
     && apt-get install -y \
