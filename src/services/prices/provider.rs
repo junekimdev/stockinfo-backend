@@ -44,7 +44,7 @@ pub async fn update_price_db(stock_code: &str) -> Result<()> {
 }
 
 #[tracing::instrument(err)]
-pub async fn get_price_latest(stock_code: &str) -> Result<krx::ResBody> {
+pub async fn get_price_all_latest() -> Result<krx::ResBody> {
     let cache_key = "dbms/MDC/STAT/standard/MDCSTAT01501";
     let cache_time = 600; // 10 minutes
 
@@ -61,6 +61,14 @@ pub async fn get_price_latest(stock_code: &str) -> Result<krx::ResBody> {
             data
         }
     };
+
+    Ok(res)
+}
+
+#[tracing::instrument(err)]
+pub async fn get_price_latest(stock_code: &str) -> Result<krx::ResBody> {
+    // Check cache first
+    let res = get_price_all_latest().await?;
 
     // Filter data to find price for the company
     let prices: Vec<krx::Price> = res

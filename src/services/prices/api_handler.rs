@@ -34,6 +34,14 @@ pub async fn handler_put(
 }
 
 #[tracing::instrument(err)]
+#[actix_web::get("/prices/snapshot")]
+pub async fn handler_get_snapshot(req: actix_web::HttpRequest) -> Result<actix_web::HttpResponse> {
+    let res = provider::get_price_all_latest().await?;
+
+    return Ok(actix_web::HttpResponse::Ok().json(res));
+}
+
+#[tracing::instrument(err)]
 #[actix_web::get("/prices/{short_code}/latest")]
 pub async fn handler_get_latest(
     req: actix_web::HttpRequest,
