@@ -210,7 +210,7 @@ impl<'de> serde::de::Visitor<'de> for KrxDatetimeVisitor {
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             formatter,
-            "string in datetime format: [year].[month].[day] [period] [hour]:[minute]:[second]"
+            "string in datetime format: [year].[month].[day] [AM|PM] [hour]:[minute]:[second]"
         )
     }
 
@@ -218,16 +218,28 @@ impl<'de> serde::de::Visitor<'de> for KrxDatetimeVisitor {
     where
         E: serde::de::Error,
     {
-        let format = time::macros::format_description!(
-            "[year].[month].[day] [period] [hour]:[minute]:[second]"
-        );
-        let primitive = time::PrimitiveDateTime::parse(v, &format).unwrap();
-        let datetime = time::OffsetDateTime::new_in_offset(
-            primitive.date(),
-            primitive.time(),
-            time::macros::offset!(+9:00:00), // Korean Standard Timezone
-        );
-        Ok(datetime)
+        let format_date = time::macros::format_description!("[year].[month].[day]");
+        let format_time = time::macros::format_description!("[hour]:[minute]:[second]");
+        let mut dt = v.split_ascii_whitespace();
+        let date = dt
+            .next()
+            .map(|s| time::Date::parse(s, &format_date).unwrap())
+            .unwrap();
+        let is_pm = dt.next().map(|s| s == "PM").unwrap();
+        let mut time = dt
+            .next()
+            .map(|s| time::Time::parse(s, &format_time).unwrap())
+            .unwrap();
+
+        // Apply AM/PM
+        if is_pm && time.hour() != 12 {
+            time += time::Duration::hours(12);
+        } else if !is_pm && time.hour() == 12 {
+            time -= time::Duration::hours(12);
+        }
+
+        let tz = time::macros::offset!(+9:00:00); // Korean Standard timezone
+        Ok(time::OffsetDateTime::new_in_offset(date, time, tz))
     }
 
     fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
@@ -245,4 +257,40 @@ where
     D: serde::Deserializer<'de>,
 {
     deserializer.deserialize_string(KrxDatetimeVisitor)
+}
+
+//==================== Tests ====================
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[derive(Debug, serde::Deserialize, PartialEq)]
+    struct KrxDatetime {
+        #[serde(deserialize_with = "krx_datetime_deserialize")]
+        time: time::OffsetDateTime,
+    }
+
+    #[test]
+    fn test_deserialize_krx_datetime() {
+        {
+            let json = "{\"time\": \"2024.01.01 AM 12:00:00\"}";
+            let result = serde_json::from_str::<KrxDatetime>(json).unwrap();
+            assert_eq!(result.time.hour(), 0);
+        }
+        {
+            let json = "{\"time\": \"2024.01.01 AM 01:00:00\"}";
+            let result = serde_json::from_str::<KrxDatetime>(json).unwrap();
+            assert_eq!(result.time.hour(), 1);
+        }
+        {
+            let json = "{\"time\": \"2024.01.01 PM 12:00:00\"}";
+            let result = serde_json::from_str::<KrxDatetime>(json).unwrap();
+            assert_eq!(result.time.hour(), 12);
+        }
+        {
+            let json = "{\"time\": \"2024.01.01 PM 01:00:00\"}";
+            let result = serde_json::from_str::<KrxDatetime>(json).unwrap();
+            assert_eq!(result.time.hour(), 13);
+        }
+    }
 }
