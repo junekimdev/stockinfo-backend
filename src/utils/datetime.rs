@@ -208,31 +208,26 @@ impl<'de> serde::de::Visitor<'de> for KrxDatetimeVisitor {
     type Value = time::OffsetDateTime;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(formatter, "string in date format: YYYYMMDD | YYYY-MM-DD")
+        write!(
+            formatter,
+            "string in datetime format: [year].[month].[day] [period] [hour]:[minute]:[second]"
+        )
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
     where
         E: serde::de::Error,
     {
-        let format_date = time::macros::format_description!("[year].[month].[day]");
-        let format_time = time::macros::format_description!("[hour]:[minute]:[second]");
-        let mut dt = v.split_ascii_whitespace();
-        let date = dt
-            .next()
-            .map(|s| time::Date::parse(s, &format_date).unwrap())
-            .unwrap();
-        let is_pm = dt.next().map(|s| s == "PM").unwrap();
-        let mut time = dt
-            .next()
-            .map(|s| time::Time::parse(s, &format_time).unwrap())
-            .unwrap();
-        if is_pm {
-            time += time::Duration::hours(12);
-        }
-        let current_datetime =
-            time::OffsetDateTime::new_in_offset(date, time, time::macros::offset!(+9:00:00));
-        Ok(current_datetime)
+        let format = time::macros::format_description!(
+            "[year].[month].[day] [period] [hour]:[minute]:[second]"
+        );
+        let primitive = time::PrimitiveDateTime::parse(v, &format).unwrap();
+        let datetime = time::OffsetDateTime::new_in_offset(
+            primitive.date(),
+            primitive.time(),
+            time::macros::offset!(+9:00:00), // Korean Standard Timezone
+        );
+        Ok(datetime)
     }
 
     fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
