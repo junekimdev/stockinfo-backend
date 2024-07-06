@@ -151,20 +151,39 @@ pub async fn clear_prices() -> Result<()> {
 
 #[tracing::instrument(err)]
 async fn fetch_krx_prices_all() -> Result<krx::ResBody> {
+    let web_client = reqwest::Client::new();
     let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
+    let url_date = Settings::instance().urls.kr_krx_price_date.clone();
     let url = Settings::instance().urls.kr_krx_price.clone();
     let referer = Settings::instance().urls.kr_krx_price_referer.clone();
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
-    let format_date = time::macros::format_description!("[year][month][day]");
-    let now = time::OffsetDateTime::now_utc();
+
+    // Get latest date of the data from KRX
+    let res = web_client
+        .get(url_date)
+        .header(reqwest::header::HOST, host)
+        .header(reqwest::header::USER_AGENT, &agent)
+        .header(reqwest::header::REFERER, &referer)
+        .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
+        .query(&[
+            ("baseName", "krx.mdc.i18n.component"),
+            ("key", "B128.bld"),
+            ("locale", "ko"),
+        ])
+        .send()
+        .await?
+        .json::<web::krx::LatestDateRes>()
+        .await?;
+
+    let date_latest = res.result.output[0].get("max_work_dt").unwrap();
 
     // Fetch data from internet
-    let res = reqwest::Client::new()
+    let res = web_client
         .post(req_url.clone())
         .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, agent)
-        .header(reqwest::header::REFERER, referer)
+        .header(reqwest::header::USER_AGENT, &agent)
+        .header(reqwest::header::REFERER, &referer)
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
         .form(&[
             ("bld", "dbms/MDC/STAT/standard/MDCSTAT01501"),
@@ -173,7 +192,7 @@ async fn fetch_krx_prices_all() -> Result<krx::ResBody> {
             ("share", "1"),
             ("money", "1"),
             ("csvxls_isNo", "false"),
-            ("trdDd", now.date().format(&format_date)?.as_str()),
+            ("trdDd", date_latest),
         ])
         .send()
         .await?

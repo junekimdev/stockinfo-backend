@@ -33,3 +33,18 @@ pub struct Price {
     pub mkt_id: String,
     pub mkt_nm: String,
 }
+
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct LatestDateRes {
+    // pub controller: String,
+    // pub dir: String,
+    pub result: MaxDateResult,
+    // pub cmd: String,
+    #[serde(flatten)]
+    _extra: std::collections::HashMap<String, serde_json::Value>,
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct MaxDateResult {
+    pub output: Vec<std::collections::HashMap<String, String>>,
+}
