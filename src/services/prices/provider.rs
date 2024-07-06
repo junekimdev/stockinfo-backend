@@ -153,6 +153,7 @@ pub async fn clear_prices() -> Result<()> {
 async fn fetch_krx_prices_all() -> Result<krx::ResBody> {
     let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let url = Settings::instance().urls.kr_krx_price.clone();
+    let referer = Settings::instance().urls.kr_krx_price_referer.clone();
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
     let format_date = time::macros::format_description!("[year][month][day]");
@@ -160,11 +161,12 @@ async fn fetch_krx_prices_all() -> Result<krx::ResBody> {
 
     // Fetch data from internet
     let res = reqwest::Client::new()
-        .get(req_url.clone())
+        .post(req_url.clone())
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::USER_AGENT, agent)
+        .header(reqwest::header::REFERER, referer)
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
-        .query(&[
+        .form(&[
             ("bld", "dbms/MDC/STAT/standard/MDCSTAT01501"),
             ("locale", "ko_KR"),
             ("mktId", "ALL"),

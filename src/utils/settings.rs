@@ -55,6 +55,7 @@ pub struct Urls {
     pub kr_price: String,
     pub kr_company: String,
     pub kr_krx_price: String,
+    pub kr_krx_price_referer: String,
     pub us_ticker: String,
     pub us_submissions: String,
     pub us_price: String,
