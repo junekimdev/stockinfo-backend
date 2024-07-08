@@ -380,7 +380,6 @@ fn map_by_week(prices: Vec<StockPriceItem>) -> WeeklyPriceHashMap {
     map
 }
 
-#[tracing::instrument(skip_all)]
 fn aggregate_to_weekly(
     v: &Vec<StockPriceItem>,
 ) -> (
