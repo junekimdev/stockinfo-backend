@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct Group<'a, 'input> {
     pub tag: &'a str,
@@ -9,12 +8,12 @@ pub struct Group<'a, 'input> {
 }
 
 impl<'a, 'input> Group<'a, 'input> {
-    #[allow(unused)]
     pub fn extract(doc: &'a roxmltree::Document<'input>, tag: &'a str) -> Group<'a, 'input> {
-        let nodes = doc
-            .root_element()
-            .children()
-            .filter(|child| child.is_element() && child.has_tag_name(tag));
+        let nodes = doc.root_element().children().filter(|child| {
+            child.is_element()
+                && child.tag_name().name().starts_with(tag)
+                && !child.tag_name().name().ends_with("TextBlock")
+        });
 
         let context_ids = nodes
             .clone()
@@ -67,7 +66,6 @@ impl<'a, 'input> Group<'a, 'input> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct ElementSingle<'a> {
     pub id: &'a str,
@@ -77,38 +75,33 @@ pub struct ElementSingle<'a> {
 }
 
 impl<'a> ElementSingle<'a> {
-    #[allow(unused)]
     pub fn no_segment(&self) -> bool {
         self.context.entity.segment.is_none()
     }
 
-    #[allow(unused)]
-    pub fn is_segment(&self, member_tag: &str) -> bool {
-        match &self.context.entity.segment {
-            Some(seg) => {
-                for mem in seg.members.iter() {
-                    if mem.text == member_tag {
-                        return true;
-                    }
-                }
-                false
-            }
-            None => false,
-        }
-    }
+    // pub fn is_segment(&self, member_tag: &str) -> bool {
+    //     match &self.context.entity.segment {
+    //         Some(seg) => {
+    //             for mem in seg.members.iter() {
+    //                 if mem.text == member_tag {
+    //                     return true;
+    //                 }
+    //             }
+    //             false
+    //         }
+    //         None => false,
+    //     }
+    // }
 
-    #[allow(unused)]
-    pub fn get_date(&self) -> Option<time::Date> {
-        self.context.period.date
-    }
+    // pub fn get_date(&self) -> Option<time::Date> {
+    //     self.context.period.date
+    // }
 
-    #[allow(unused)]
-    pub fn get_date_range(&self) -> (Option<time::Date>, Option<time::Date>) {
-        (self.context.period.start_date, self.context.period.end_date)
-    }
+    // pub fn get_date_range(&self) -> (Option<time::Date>, Option<time::Date>) {
+    //     (self.context.period.start_date, self.context.period.end_date)
+    // }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct Context<'a> {
     pub id: &'a str,
@@ -161,7 +154,6 @@ impl<'a, 'input> From<roxmltree::Node<'a, 'input>> for Context<'a> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct Entity<'a> {
     pub segment: Option<Segment<'a>>,
@@ -187,7 +179,6 @@ impl<'a, 'input> From<roxmltree::Node<'a, 'input>> for Entity<'a> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct Segment<'a> {
     pub members: Vec<SegmentMember<'a>>,
@@ -207,7 +198,6 @@ impl<'a, 'input> From<roxmltree::Node<'a, 'input>> for Segment<'a> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct SegmentMember<'a> {
     pub dimension: &'a str,
@@ -223,7 +213,6 @@ impl<'a, 'input> From<roxmltree::Node<'a, 'input>> for SegmentMember<'a> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Period {
     pub date: Option<time::Date>,
