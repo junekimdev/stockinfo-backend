@@ -54,46 +54,109 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
     // Parse report to extract data
     let doc = roxmltree::Document::parse(&res)?;
 
-    let outstanding_stock = xbrl::Group::extract(&doc, "CommonStockSharesOutstanding")
+    let mut outstanding_stock = xbrl::Group::extract(&doc, "CommonStockSharesOutstanding", true)
         .to_vec_date_and_value()
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
-    let assets = xbrl::Group::extract(&doc, "Assets")
+    if outstanding_stock.is_empty() {
+        outstanding_stock = xbrl::Group::extract(&doc, "CommonStockSharesOutstanding", false)
+            .to_vec_date_and_value()
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
+
+    let mut assets = xbrl::Group::extract(&doc, "Assets", true)
         .to_vec_date_and_value()
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
-    let equity = xbrl::Group::extract(&doc, "StockholdersEquity")
+    if assets.is_empty() {
+        assets = xbrl::Group::extract(&doc, "Assets", false)
+            .to_vec_date_and_value()
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
+
+    let mut equity = xbrl::Group::extract(&doc, "StockholdersEquity", true)
         .to_vec_date_and_value()
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
-    let liabilities = xbrl::Group::extract(&doc, "Liabilities")
+    if equity.is_empty() {
+        equity = xbrl::Group::extract(&doc, "StockholdersEquity", false)
+            .to_vec_date_and_value()
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
+
+    let mut liabilities = xbrl::Group::extract(&doc, "Liabilities", true)
         .to_vec_date_and_value()
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
-    let revenue = xbrl::Group::extract(&doc, "Revenue")
+    if liabilities.is_empty() {
+        liabilities = xbrl::Group::extract(&doc, "Liabilities", false)
+            .to_vec_date_and_value()
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
+
+    let mut revenue = xbrl::Group::extract(&doc, "Revenues", true)
         .to_vec_date_and_value()
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
-    let operating_income = xbrl::Group::extract(&doc, "OperatingIncomeLoss")
+    if revenue.is_empty() {
+        revenue = xbrl::Group::extract(&doc, "Revenue", false) // Notice: Revenues vs Revenue
+            .to_vec_date_and_value()
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
+
+    let mut operating_income = xbrl::Group::extract(&doc, "OperatingIncomeLoss", true)
         .to_vec_date_and_value()
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
-    let net_income = xbrl::Group::extract(&doc, "NetIncomeLoss")
+    if operating_income.is_empty() {
+        operating_income = xbrl::Group::extract(&doc, "OperatingIncomeLoss", false)
+            .to_vec_date_and_value()
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
+
+    let mut net_income = xbrl::Group::extract(&doc, "NetIncomeLoss", true)
         .to_vec_date_and_value()
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
-    let comprehensive_income = xbrl::Group::extract(&doc, "ComprehensiveIncomeNetOfTax")
+    if net_income.is_empty() {
+        net_income = xbrl::Group::extract(&doc, "NetIncomeLoss", false)
+            .to_vec_date_and_value()
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
+
+    let mut comprehensive_income = xbrl::Group::extract(&doc, "ComprehensiveIncomeNetOfTax", true)
         .to_vec_date_and_value()
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
+    if comprehensive_income.is_empty() {
+        comprehensive_income = xbrl::Group::extract(&doc, "ComprehensiveIncomeNetOfTax", false)
+            .to_vec_date_and_value()
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
 
     // Return statement
     Ok(edgar::StatementRes {

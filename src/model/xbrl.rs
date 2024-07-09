@@ -8,11 +8,19 @@ pub struct Group<'a, 'input> {
 }
 
 impl<'a, 'input> Group<'a, 'input> {
-    pub fn extract(doc: &'a roxmltree::Document<'input>, tag: &'a str) -> Group<'a, 'input> {
+    pub fn extract(
+        doc: &'a roxmltree::Document<'input>,
+        tag: &'a str,
+        exact: bool,
+    ) -> Group<'a, 'input> {
         let nodes = doc.root_element().children().filter(|child| {
-            child.is_element()
-                && child.tag_name().name().starts_with(tag)
-                && !child.tag_name().name().ends_with("TextBlock")
+            if exact {
+                child.is_element() && child.has_tag_name(tag)
+            } else {
+                child.is_element()
+                    && child.tag_name().name().starts_with(tag)
+                    && !child.tag_name().name().ends_with("TextBlock")
+            }
         });
 
         let context_ids = nodes
