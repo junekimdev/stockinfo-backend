@@ -78,30 +78,27 @@ impl<'a> ElementSingle<'a> {
         self.context.entity.segment.is_none()
     }
 
-    #[allow(unused)]
-    pub fn is_segment(&self, member_tag: &str) -> bool {
-        match &self.context.entity.segment {
-            Some(seg) => {
-                for mem in seg.members.iter() {
-                    if mem.text == member_tag {
-                        return true;
-                    }
-                }
-                false
-            }
-            None => false,
-        }
-    }
+    // pub fn is_segment(&self, member_tag: &str) -> bool {
+    //     match &self.context.entity.segment {
+    //         Some(seg) => {
+    //             for mem in seg.members.iter() {
+    //                 if mem.text == member_tag {
+    //                     return true;
+    //                 }
+    //             }
+    //             false
+    //         }
+    //         None => false,
+    //     }
+    // }
 
-    #[allow(unused)]
-    pub fn get_date(&self) -> Option<time::Date> {
-        self.context.period.date
-    }
+    // pub fn get_date(&self) -> Option<time::Date> {
+    //     self.context.period.date
+    // }
 
-    #[allow(unused)]
-    pub fn get_date_range(&self) -> (Option<time::Date>, Option<time::Date>) {
-        (self.context.period.start_date, self.context.period.end_date)
-    }
+    // pub fn get_date_range(&self) -> (Option<time::Date>, Option<time::Date>) {
+    //     (self.context.period.start_date, self.context.period.end_date)
+    // }
 }
 
 #[derive(Debug, Clone)]
