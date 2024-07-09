@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct Group<'a, 'input> {
     pub tag: &'a str,
@@ -9,7 +8,6 @@ pub struct Group<'a, 'input> {
 }
 
 impl<'a, 'input> Group<'a, 'input> {
-    #[allow(unused)]
     pub fn extract(doc: &'a roxmltree::Document<'input>, tag: &'a str) -> Group<'a, 'input> {
         let nodes = doc
             .root_element()
@@ -67,7 +65,6 @@ impl<'a, 'input> Group<'a, 'input> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct ElementSingle<'a> {
     pub id: &'a str,
@@ -77,7 +74,6 @@ pub struct ElementSingle<'a> {
 }
 
 impl<'a> ElementSingle<'a> {
-    #[allow(unused)]
     pub fn no_segment(&self) -> bool {
         self.context.entity.segment.is_none()
     }
@@ -108,7 +104,6 @@ impl<'a> ElementSingle<'a> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct Context<'a> {
     pub id: &'a str,
@@ -161,7 +156,6 @@ impl<'a, 'input> From<roxmltree::Node<'a, 'input>> for Context<'a> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct Entity<'a> {
     pub segment: Option<Segment<'a>>,
@@ -187,7 +181,6 @@ impl<'a, 'input> From<roxmltree::Node<'a, 'input>> for Entity<'a> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct Segment<'a> {
     pub members: Vec<SegmentMember<'a>>,
@@ -207,7 +200,6 @@ impl<'a, 'input> From<roxmltree::Node<'a, 'input>> for Segment<'a> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone)]
 pub struct SegmentMember<'a> {
     pub dimension: &'a str,
@@ -223,7 +215,6 @@ impl<'a, 'input> From<roxmltree::Node<'a, 'input>> for SegmentMember<'a> {
     }
 }
 
-#[allow(unused)]
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Period {
     pub date: Option<time::Date>,
