@@ -9,10 +9,11 @@ pub struct Group<'a, 'input> {
 
 impl<'a, 'input> Group<'a, 'input> {
     pub fn extract(doc: &'a roxmltree::Document<'input>, tag: &'a str) -> Group<'a, 'input> {
-        let nodes = doc
-            .root_element()
-            .children()
-            .filter(|child| child.is_element() && child.has_tag_name(tag));
+        let nodes = doc.root_element().children().filter(|child| {
+            child.is_element()
+                && child.tag_name().name().starts_with(tag)
+                && !child.tag_name().name().ends_with("TextBlock")
+        });
 
         let context_ids = nodes
             .clone()
