@@ -38,11 +38,11 @@ impl<'a, 'input> Group<'a, 'input> {
 
     pub fn to_vec_date_and_value(&'a self) -> Vec<(Period, String)> {
         let mut temp: HashMap<String, (Period, String)> = HashMap::new();
-        for tag in self.transpose() {
-            if tag.no_segment() {
-                let k = tag.context.id.to_string();
-                let v1 = tag.context.period.clone();
-                let v2 = tag.text.unwrap().to_string();
+        for element in self.transpose() {
+            if element.no_segment() {
+                let k = element.context.id.to_string();
+                let v1 = element.context.period.clone();
+                let v2 = element.text.unwrap().to_string();
                 temp.entry(k).or_insert((v1, v2));
             }
         }
