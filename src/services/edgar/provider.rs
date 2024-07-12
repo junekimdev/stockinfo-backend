@@ -66,6 +66,13 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
             .map(edgar::StatementItem::from)
             .collect::<Vec<edgar::StatementItem>>();
     }
+    if outstanding_stock.is_empty() {
+        outstanding_stock = xbrl::Group::extract(&doc, "CommonStockSharesOutstanding", false)
+            .to_vec_date_and_value_with_segment("us-gaap:CommonClassAMember")
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
 
     let mut assets = xbrl::Group::extract(&doc, "Assets", true)
         .to_vec_date_and_value()
