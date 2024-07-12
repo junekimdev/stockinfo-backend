@@ -50,6 +50,23 @@ impl<'a, 'input> Group<'a, 'input> {
         r
     }
 
+    pub fn to_vec_date_and_value_with_segment(
+        &'a self,
+        seg_text: &'a str,
+    ) -> Vec<(Period, String)> {
+        let mut temp: HashMap<String, (Period, String)> = HashMap::new();
+        for element in self.transpose() {
+            if element.is_segment(seg_text) {
+                let k = element.context.id.to_string();
+                let v1 = element.context.period.clone();
+                let v2 = element.text.unwrap().to_string();
+                temp.entry(k).or_insert((v1, v2));
+            }
+        }
+        let r: Vec<(Period, String)> = temp.values().cloned().collect();
+        r
+    }
+
     fn transpose(&'a self) -> Vec<ElementSingle<'a>> {
         self.nodes
             .iter()
@@ -87,19 +104,19 @@ impl<'a> ElementSingle<'a> {
         self.context.entity.segment.is_none()
     }
 
-    // pub fn is_segment(&self, member_tag: &str) -> bool {
-    //     match &self.context.entity.segment {
-    //         Some(seg) => {
-    //             for mem in seg.members.iter() {
-    //                 if mem.text == member_tag {
-    //                     return true;
-    //                 }
-    //             }
-    //             false
-    //         }
-    //         None => false,
-    //     }
-    // }
+    pub fn is_segment(&self, member_text: &str) -> bool {
+        match &self.context.entity.segment {
+            Some(seg) => {
+                for mem in seg.members.iter() {
+                    if mem.text == member_text {
+                        return true;
+                    }
+                }
+                false
+            }
+            None => false,
+        }
+    }
 
     // pub fn get_date(&self) -> Option<time::Date> {
     //     self.context.period.date
