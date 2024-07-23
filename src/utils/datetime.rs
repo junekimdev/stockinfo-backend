@@ -88,7 +88,6 @@ pub fn get_sunday_of_week(date: &time::Date) -> crate::utils::Result<time::Date>
 
 //==================== Date Serialize/Deserialize ====================
 
-#[allow(unused)]
 /// Serialize time::Date into YYYYMMDD format
 pub fn date_serialize<S>(t: &time::Date, serializer: S) -> Result<S::Ok, S::Error>
 where
@@ -99,7 +98,6 @@ where
     serializer.serialize_str(&s)
 }
 
-#[allow(unused)]
 /// Serialize Optional time::Date into YYYYMMDD format
 pub fn date_opt_serialize<S>(t: &Option<time::Date>, serializer: S) -> Result<S::Ok, S::Error>
 where
@@ -150,7 +148,6 @@ impl<'de> serde::de::Visitor<'de> for DateVisitor {
     }
 }
 
-#[allow(unused)]
 /// Deserialize time::Date from string
 pub fn date_deserialize<'de, D>(deserializer: D) -> Result<time::Date, D::Error>
 where
@@ -187,7 +184,6 @@ impl<'de> serde::de::Visitor<'de> for DateOptVisitor {
     }
 }
 
-#[allow(unused)]
 /// Deserialize Optional time::Date from string
 pub fn date_opt_deserialize<'de, D>(deserializer: D) -> Result<Option<time::Date>, D::Error>
 where
@@ -246,7 +242,6 @@ impl<'de> serde::de::Visitor<'de> for KrxDatetimeVisitor {
     }
 }
 
-#[allow(unused)]
 /// Deserialize time::OffsetDateTime from KRX datetime string
 pub fn krx_datetime_deserialize<'de, D>(deserializer: D) -> Result<time::OffsetDateTime, D::Error>
 where
