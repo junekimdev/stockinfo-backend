@@ -1,20 +1,17 @@
 use super::error::Error;
 // use std::ops::Add;
-use std::time::{SystemTime, UNIX_EPOCH};
+// use std::time::{SystemTime, UNIX_EPOCH};
 
-#[tracing::instrument(skip_all, err)]
-pub fn get_timestamp(t: SystemTime) -> crate::utils::Result<u64> {
-    let epoch = t.duration_since(UNIX_EPOCH)?;
-    Ok(epoch.as_secs())
-}
+// pub fn get_timestamp(t: SystemTime) -> crate::utils::Result<u64> {
+//     let epoch = t.duration_since(UNIX_EPOCH)?;
+//     Ok(epoch.as_secs())
+// }
 
-// #[tracing::instrument(skip_all)]
 // pub fn parse_time_from(micros: u64) -> SystemTime {
 //     let t = std::time::Duration::from_micros(micros);
 //     UNIX_EPOCH.add(t)
 // }
 
-#[tracing::instrument(skip_all, err)]
 pub fn parse_date_from(str: &str) -> crate::utils::Result<time::Date> {
     let format1 = time::macros::format_description!("[year][month][day]");
     let format2 = time::macros::format_description!("[year]-[month]-[day]");
@@ -31,7 +28,6 @@ pub fn parse_date_from(str: &str) -> crate::utils::Result<time::Date> {
     }
 }
 
-#[tracing::instrument(skip_all, err)]
 pub fn get_sunday_of_week(date: &time::Date) -> crate::utils::Result<time::Date> {
     Ok(time::Date::from_iso_week_date(
         date.year(),
