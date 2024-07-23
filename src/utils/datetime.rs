@@ -1,20 +1,17 @@
 use super::error::Error;
 // use std::ops::Add;
-use std::time::{SystemTime, UNIX_EPOCH};
+// use std::time::{SystemTime, UNIX_EPOCH};
 
-#[tracing::instrument(skip_all, err)]
-pub fn get_timestamp(t: SystemTime) -> crate::utils::Result<u64> {
-    let epoch = t.duration_since(UNIX_EPOCH)?;
-    Ok(epoch.as_secs())
-}
+// pub fn get_timestamp(t: SystemTime) -> crate::utils::Result<u64> {
+//     let epoch = t.duration_since(UNIX_EPOCH)?;
+//     Ok(epoch.as_secs())
+// }
 
-// #[tracing::instrument(skip_all)]
 // pub fn parse_time_from(micros: u64) -> SystemTime {
 //     let t = std::time::Duration::from_micros(micros);
 //     UNIX_EPOCH.add(t)
 // }
 
-#[tracing::instrument(skip_all, err)]
 pub fn parse_date_from(str: &str) -> crate::utils::Result<time::Date> {
     let format1 = time::macros::format_description!("[year][month][day]");
     let format2 = time::macros::format_description!("[year]-[month]-[day]");
@@ -31,7 +28,6 @@ pub fn parse_date_from(str: &str) -> crate::utils::Result<time::Date> {
     }
 }
 
-#[tracing::instrument(skip_all, err)]
 pub fn get_sunday_of_week(date: &time::Date) -> crate::utils::Result<time::Date> {
     Ok(time::Date::from_iso_week_date(
         date.year(),
@@ -92,7 +88,6 @@ pub fn get_sunday_of_week(date: &time::Date) -> crate::utils::Result<time::Date>
 
 //==================== Date Serialize/Deserialize ====================
 
-#[allow(unused)]
 /// Serialize time::Date into YYYYMMDD format
 pub fn date_serialize<S>(t: &time::Date, serializer: S) -> Result<S::Ok, S::Error>
 where
@@ -103,7 +98,6 @@ where
     serializer.serialize_str(&s)
 }
 
-#[allow(unused)]
 /// Serialize Optional time::Date into YYYYMMDD format
 pub fn date_opt_serialize<S>(t: &Option<time::Date>, serializer: S) -> Result<S::Ok, S::Error>
 where
@@ -154,7 +148,6 @@ impl<'de> serde::de::Visitor<'de> for DateVisitor {
     }
 }
 
-#[allow(unused)]
 /// Deserialize time::Date from string
 pub fn date_deserialize<'de, D>(deserializer: D) -> Result<time::Date, D::Error>
 where
@@ -191,7 +184,6 @@ impl<'de> serde::de::Visitor<'de> for DateOptVisitor {
     }
 }
 
-#[allow(unused)]
 /// Deserialize Optional time::Date from string
 pub fn date_opt_deserialize<'de, D>(deserializer: D) -> Result<Option<time::Date>, D::Error>
 where
@@ -250,7 +242,6 @@ impl<'de> serde::de::Visitor<'de> for KrxDatetimeVisitor {
     }
 }
 
-#[allow(unused)]
 /// Deserialize time::OffsetDateTime from KRX datetime string
 pub fn krx_datetime_deserialize<'de, D>(deserializer: D) -> Result<time::OffsetDateTime, D::Error>
 where

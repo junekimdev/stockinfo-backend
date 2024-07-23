@@ -1,6 +1,6 @@
 [package]
 name = "stockinfo-backend"
-version = "1.1.15"
+version = "1.1.16"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -20,12 +20,12 @@ deadpool-redis = {version = "0.15", features = ["rt_tokio_1", "serde"]}
 tracing = "0.1"
 tracing-subscriber = {version = "0.3", features = ["env-filter", "registry"] }
 tracing-actix-web = "0.7"
-tracing-opentelemetry = "0.24"
+tracing-opentelemetry = "0.25"
 
 # opentelemetry
-opentelemetry = "0.23"
-opentelemetry_sdk = {version = "0.23",features = ["rt-tokio"]}
-opentelemetry-otlp = "0.16"
+opentelemetry = "0.24"
+opentelemetry_sdk = {version = "0.24",features = ["rt-tokio"]}
+opentelemetry-otlp = "0.17"
 
 # files
 zip = "2.1"
