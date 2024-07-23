@@ -1,4 +1,5 @@
 use super::settings;
+use opentelemetry::trace::TracerProvider;
 use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::trace;
 use tracing_opentelemetry::OpenTelemetryLayer;
@@ -16,7 +17,7 @@ impl OpenTelemetry {
             .with_endpoint(settings::Settings::instance().jaeger.agent_endpoint.clone())
             .with_timeout(std::time::Duration::from_secs(3));
 
-        let tracer_config = trace::config()
+        let tracer_config = trace::Config::default()
             .with_sampler(trace::Sampler::AlwaysOn)
             .with_id_generator(trace::RandomIdGenerator::default())
             .with_max_events_per_span(64)
@@ -32,7 +33,8 @@ impl OpenTelemetry {
             .with_exporter(jaeger_exporter)
             .with_trace_config(tracer_config)
             .install_batch(opentelemetry_sdk::runtime::Tokio)
-            .expect("failed to install OpenTelemetry tracer");
+            .expect("failed to install OpenTelemetry tracer")
+            .tracer("opentelemetry-otlp");
 
         let jaeger_layer = tracing_opentelemetry::layer().with_tracer(jaeger_tracer);
 
