@@ -1,10 +1,8 @@
-use actix_web::web::Buf;
 use rust_decimal::prelude::*;
-use std::io::BufRead;
 
 use crate::model::{
-    StockPriceUS, StockUSDayPriceRes, StockUSPriceExistsRes, StockUSWeekPrice,
-    StockUSWeeklyPriceRes,
+    stockprice_us_from_yahoo, web, StockPriceUS, StockUSDayPriceRes, StockUSPriceExistsRes,
+    StockUSWeekPrice, StockUSWeeklyPriceRes,
 };
 use crate::utils::{datetime::get_sunday_of_week, db, settings::Settings, Result};
 
@@ -61,27 +59,25 @@ pub async fn get_price_latest(ticker: &str) -> Result<StockUSDayPriceRes> {
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::USER_AGENT, agent)
-        .header(reqwest::header::ACCEPT, "text/csv;charset=UTF-8")
+        .header(reqwest::header::ACCEPT, "application/json")
         .query(&[
+            ("symbol", ticker),
             ("period1", prev_week.as_str()),
             ("period2", now.as_str()),
             ("interval", "1d"),
-            ("events", "history"),
-            ("includeAdjustedClose", "true"),
+            ("useYfid", "true"),
+            ("includePrePost", "true"),
+            ("events", "div|split|earn"),
+            ("lang", "en-US"),
+            ("region", "US"),
+            ("corsDomain", "finance.yahoo.com"),
         ])
         .send()
         .await?
-        .bytes()
+        .json::<web::yahoo::ResBody>()
         .await?;
 
-    let mut prices: Vec<StockPriceUS> = Vec::new();
-    let mut lines = res.reader().lines();
-    let _header = lines.next(); // throw away headers
-
-    for line in lines.map_while(std::io::Result::ok) {
-        let vec: Vec<&str> = line.split(',').collect();
-        prices.push(StockPriceUS::from(vec));
-    }
+    let prices: Vec<StockPriceUS> = stockprice_us_from_yahoo(&res)?;
 
     Ok(StockUSDayPriceRes {
         ticker: ticker.to_string(),
@@ -164,6 +160,16 @@ async fn update_prices_web(
     let url = Settings::instance().urls.us_price.clone() + "/" + ticker;
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
+    let start_day = match date_from {
+        Some(date) => time::OffsetDateTime::new_in_offset(
+            date,
+            time::Time::from_hms(9, 30, 0).unwrap(), // 9:30ET is the opening time
+            time::UtcOffset::from_hms(-5, 0, 0).unwrap(), // Use EST timezone; MIDNIGHT in EST comes later than in EDT
+        )
+        .unix_timestamp()
+        .to_string(),
+        None => "1577836800".to_string(), // 2020-01-01
+    };
     let prev_day = time::OffsetDateTime::now_utc()
         .to_offset(time::macros::offset!(-5)) // Use EST timezone; MIDNIGHT in EST comes later than in EDT
         .replace_time(time::Time::MIDNIGHT)
@@ -176,27 +182,25 @@ async fn update_prices_web(
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::USER_AGENT, agent)
-        .header(reqwest::header::ACCEPT, "text/csv;charset=UTF-8")
+        .header(reqwest::header::ACCEPT, "application/json")
         .query(&[
-            ("period1", "1577836800"), // 2020-01-01
+            ("symbol", ticker),
+            ("period1", &start_day),
             ("period2", &prev_day),
             ("interval", "1d"),
-            ("events", "history"),
-            ("includeAdjustedClose", "true"),
+            ("useYfid", "true"),
+            ("includePrePost", "true"),
+            ("events", "div|split|earn"),
+            ("lang", "en-US"),
+            ("region", "US"),
+            ("corsDomain", "finance.yahoo.com"),
         ])
         .send()
         .await?
-        .bytes()
+        .json::<web::yahoo::ResBody>()
         .await?;
 
-    let mut prices: Vec<StockPriceUS> = Vec::new();
-    let mut lines = res.reader().lines();
-    let _header = lines.next(); // throw away headers
-
-    for line in lines.map_while(std::io::Result::ok) {
-        let vec: Vec<&str> = line.split(',').collect();
-        prices.push(StockPriceUS::from(vec));
-    }
+    let prices: Vec<StockPriceUS> = stockprice_us_from_yahoo(&res)?;
 
     // Store in DB
     const SQL_INSERT: &str = "
