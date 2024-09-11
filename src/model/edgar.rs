@@ -61,7 +61,7 @@ impl redis::ToRedisArgs for StatementRes {
 impl redis::FromRedisValue for StatementRes {
     fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
         match *v {
-            redis::Value::Data(ref bytes) => {
+            redis::Value::BulkString(ref bytes) => {
                 let msg = std::str::from_utf8(bytes)?;
                 let object = serde_json::from_str::<Self>(msg).unwrap();
                 Ok(object)

@@ -32,7 +32,7 @@ impl redis::ToRedisArgs for ResBody {
 impl redis::FromRedisValue for ResBody {
     fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
         match *v {
-            redis::Value::Data(ref bytes) => {
+            redis::Value::BulkString(ref bytes) => {
                 let msg = std::str::from_utf8(bytes)?;
                 let object = serde_json::from_str::<Self>(msg).unwrap();
                 Ok(object)
@@ -125,7 +125,7 @@ impl redis::ToRedisArgs for Price {
 impl redis::FromRedisValue for Price {
     fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
         match *v {
-            redis::Value::Data(ref bytes) => {
+            redis::Value::BulkString(ref bytes) => {
                 let msg = std::str::from_utf8(bytes)?;
                 let object = serde_json::from_str::<Self>(msg).unwrap();
                 Ok(object)
