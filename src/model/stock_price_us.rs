@@ -1,6 +1,7 @@
-use crate::utils::datetime::{date_deserialize, date_serialize, parse_date_from};
+use rust_decimal::prelude::FromPrimitive;
 
-use std::str::FromStr;
+use crate::utils::datetime::{date_deserialize, date_serialize};
+use crate::utils::Result;
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct StockPriceUS {
@@ -23,24 +24,6 @@ pub struct StockPriceUS {
     pub volume: rust_decimal::Decimal,
 }
 
-impl From<Vec<&str>> for StockPriceUS {
-    fn from(value: Vec<&str>) -> Self {
-        if value.len() != 7 {
-            panic!("StockPriceUS expects 7 strings in vector to construct");
-        }
-
-        Self {
-            date: parse_date_from(value[0]).expect("invalid date"),
-            open: rust_decimal::Decimal::from_str(value[1]).expect("invalid open"),
-            high: rust_decimal::Decimal::from_str(value[2]).expect("invalid high"),
-            low: rust_decimal::Decimal::from_str(value[3]).expect("invalid low"),
-            close: rust_decimal::Decimal::from_str(value[4]).expect("invalid close"),
-            adj_close: rust_decimal::Decimal::from_str(value[5]).expect("invalid adj_close"),
-            volume: rust_decimal::Decimal::from_str(value[6]).expect("invalid volume"),
-        }
-    }
-}
-
 impl From<&tokio_postgres::Row> for StockPriceUS {
     fn from(value: &tokio_postgres::Row) -> Self {
         Self {
@@ -53,4 +36,33 @@ impl From<&tokio_postgres::Row> for StockPriceUS {
             volume: value.get("volume"),
         }
     }
+}
+
+#[tracing::instrument(err)]
+pub fn stockprice_us_from_yahoo(res: &super::web::yahoo::ResBody) -> Result<Vec<StockPriceUS>> {
+    let size = res.chart.result[0].timestamp.len();
+    let mut r: Vec<StockPriceUS> = Vec::with_capacity(size);
+
+    for i in 0..size {
+        let t = res.chart.result[0].timestamp[i];
+        let datetime = time::OffsetDateTime::from_unix_timestamp(t).expect("invalid timestamp");
+        let open = res.chart.result[0].indicators.quote[0].open[i];
+        let high = res.chart.result[0].indicators.quote[0].high[i];
+        let low = res.chart.result[0].indicators.quote[0].low[i];
+        let close = res.chart.result[0].indicators.quote[0].close[i];
+        let volume = res.chart.result[0].indicators.quote[0].volume[i];
+        let adj_close = res.chart.result[0].indicators.adj_close[0].adj_close[i];
+
+        r.push(StockPriceUS {
+            date: datetime.date(),
+            open: rust_decimal::Decimal::from_f32(open).expect("invalid open"),
+            high: rust_decimal::Decimal::from_f32(high).expect("invalid high"),
+            low: rust_decimal::Decimal::from_f32(low).expect("invalid low"),
+            close: rust_decimal::Decimal::from_f32(close).expect("invalid close"),
+            adj_close: rust_decimal::Decimal::from_f32(adj_close).expect("invalid adj_close"),
+            volume: rust_decimal::Decimal::from_u64(volume).expect("invalid volume"),
+        })
+    }
+
+    Ok(r)
 }

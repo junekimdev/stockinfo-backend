@@ -1,4 +1,4 @@
-use super::error::Error;
+// use super::error::Error;
 // use std::ops::Add;
 // use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -12,21 +12,21 @@ use super::error::Error;
 //     UNIX_EPOCH.add(t)
 // }
 
-pub fn parse_date_from(str: &str) -> crate::utils::Result<time::Date> {
-    let format1 = time::macros::format_description!("[year][month][day]");
-    let format2 = time::macros::format_description!("[year]-[month]-[day]");
-    match time::Date::parse(str, &format1) {
-        Ok(d1) => Ok(d1),
-        Err(e1) => match time::Date::parse(str, &format2) {
-            Ok(d2) => Ok(d2),
-            Err(e2) => Err(Error::General(format!(
-                "{} | {}",
-                &e1.to_string(),
-                &e2.to_string()
-            ))),
-        },
-    }
-}
+// pub fn parse_date_from(str: &str) -> crate::utils::Result<time::Date> {
+//     let format1 = time::macros::format_description!("[year][month][day]");
+//     let format2 = time::macros::format_description!("[year]-[month]-[day]");
+//     match time::Date::parse(str, &format1) {
+//         Ok(d1) => Ok(d1),
+//         Err(e1) => match time::Date::parse(str, &format2) {
+//             Ok(d2) => Ok(d2),
+//             Err(e2) => Err(Error::General(format!(
+//                 "{} | {}",
+//                 &e1.to_string(),
+//                 &e2.to_string()
+//             ))),
+//         },
+//     }
+// }
 
 pub fn get_sunday_of_week(date: &time::Date) -> crate::utils::Result<time::Date> {
     Ok(time::Date::from_iso_week_date(
