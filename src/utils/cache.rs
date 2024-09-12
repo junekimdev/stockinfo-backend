@@ -19,26 +19,24 @@ pub fn pool() -> &'static Pool {
 }
 
 #[tracing::instrument(err)]
-pub async fn set<V, T>(k: &str, v: &V) -> Result<T>
+pub async fn set<V>(k: &str, v: &V) -> Result<()>
 where
     V: ToRedisArgs + std::marker::Sync + std::fmt::Debug,
-    T: FromRedisValue,
 {
     let mut conn = pool().get().await?;
-    let res = conn.set_ex::<&str, &V, T>(k, v, 86400).await?; // 86400 = 24*60*60 : 1 day in sec
-    Ok(res)
+    conn.set_ex::<&str, &V, ()>(k, v, 86400).await?; // 86400 = 24*60*60 : 1 day in sec
+    Ok(())
 }
 
 #[allow(unused)]
 #[tracing::instrument(err)]
-pub async fn set_with_timer<V, T>(k: &str, v: &V, seconds: u64) -> Result<T>
+pub async fn set_with_timer<V>(k: &str, v: &V, seconds: u64) -> Result<()>
 where
     V: ToRedisArgs + std::marker::Sync + std::fmt::Debug,
-    T: FromRedisValue,
 {
     let mut conn = pool().get().await?;
-    let res = conn.set_ex::<&str, &V, T>(k, v, seconds).await?;
-    Ok(res)
+    conn.set_ex::<&str, &V, ()>(k, v, seconds).await?;
+    Ok(())
 }
 
 #[tracing::instrument(err)]
