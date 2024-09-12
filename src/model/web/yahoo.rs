@@ -7,7 +7,7 @@ pub struct ResBody {
 pub struct Chart {
     pub result: Vec<Result>,
     #[serde(flatten)]
-    pub error: serde_json::Value,
+    pub _error: serde_json::Value,
 }
 
 #[derive(Debug, Clone, serde::Deserialize)]

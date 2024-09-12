@@ -71,7 +71,7 @@ impl<'a, 'input> Group<'a, 'input> {
         self.nodes
             .iter()
             .map(|node| {
-                let id = node.attribute("id").unwrap();
+                let _id = node.attribute("id").unwrap();
                 let context_id = node.attribute("contextRef").unwrap();
                 let text = node.text();
                 let context = self
@@ -81,8 +81,8 @@ impl<'a, 'input> Group<'a, 'input> {
                     .unwrap();
 
                 ElementSingle {
-                    id,
-                    tag: self.tag,
+                    _id,
+                    _tag: self.tag,
                     context,
                     text,
                 }
@@ -93,8 +93,8 @@ impl<'a, 'input> Group<'a, 'input> {
 
 #[derive(Debug, Clone)]
 pub struct ElementSingle<'a> {
-    pub id: &'a str,
-    pub tag: &'a str,
+    pub _id: &'a str,
+    pub _tag: &'a str,
     pub context: &'a Context<'a>,
     pub text: Option<&'a str>,
 }
@@ -225,7 +225,7 @@ impl<'a, 'input> From<roxmltree::Node<'a, 'input>> for Segment<'a> {
 
 #[derive(Debug, Clone)]
 pub struct SegmentMember<'a> {
-    pub dimension: &'a str,
+    pub _dimension: &'a str,
     pub text: &'a str,
 }
 
@@ -234,7 +234,10 @@ impl<'a, 'input> From<roxmltree::Node<'a, 'input>> for SegmentMember<'a> {
         let dimension: &'a str = value.attribute("dimension").unwrap();
         let text: &'a str = value.text().unwrap();
 
-        Self { dimension, text }
+        Self {
+            _dimension: dimension,
+            text,
+        }
     }
 }
 
