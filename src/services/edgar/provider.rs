@@ -54,7 +54,9 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
 
     // Parse report to extract data
     let doc = roxmltree::Document::parse(&res)?;
-    let mut outstanding_stock = extract(&doc, "CommonStockSharesOutstanding");
+
+    // Number of outstanding stock: non-range period
+    let mut outstanding_stock = extract_date_value(&doc, "CommonStockSharesOutstanding");
     if outstanding_stock.is_empty() {
         outstanding_stock = xbrl::Group::extract(&doc, "CommonStockSharesOutstanding", false)
             .to_vec_date_and_value_with_segment("us-gaap:CommonClassAMember")
@@ -63,31 +65,37 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
             .collect::<Vec<edgar::StatementItem>>();
     }
 
-    let assets = extract(&doc, "Assets");
-    let equity = extract(&doc, "StockholdersEquity");
-    let liabilities = extract(&doc, "Liabilities");
+    // Statement of Financial Position: non-range period
+    let assets = extract_date_value(&doc, "Assets");
+    let equity = extract_date_value(&doc, "StockholdersEquity");
+    let liabilities = extract_date_value(&doc, "Liabilities");
 
+    // Statement of Income: range period
     let mut revenue = xbrl::Group::extract(&doc, "Revenues", true)
-        .to_vec_date_and_value()
+        .to_vec_range_and_value()
         .into_iter()
         .map(edgar::StatementItem::from)
         .collect::<Vec<edgar::StatementItem>>();
     if revenue.is_empty() {
         revenue = xbrl::Group::extract(&doc, "Revenue", false) // Notice: Revenues vs Revenue
-            .to_vec_date_and_value()
+            .to_vec_range_and_value()
             .into_iter()
             .map(edgar::StatementItem::from)
             .collect::<Vec<edgar::StatementItem>>();
     }
+    let operating_income = extract_range_value(&doc, "OperatingIncomeLoss");
+    let net_income = extract_range_value(&doc, "NetIncomeLoss");
+    let comprehensive_income = extract_range_value(&doc, "ComprehensiveIncomeNetOfTax");
 
-    let operating_income = extract(&doc, "OperatingIncomeLoss");
-    let net_income = extract(&doc, "NetIncomeLoss");
-    let comprehensive_income = extract(&doc, "ComprehensiveIncomeNetOfTax");
-    let operating_cash_flow = extract(&doc, "NetCashProvidedByUsedInOperatingActivities");
-    let investing_cash_flow = extract(&doc, "NetCashProvidedByUsedInInvestingActivities");
-    let financing_cash_flow = extract(&doc, "NetCashProvidedByUsedInFinancingActivities");
+    // Statement of Cash Flow: range period
+    let operating_cash_flow =
+        extract_range_value(&doc, "NetCashProvidedByUsedInOperatingActivities");
+    let investing_cash_flow =
+        extract_range_value(&doc, "NetCashProvidedByUsedInInvestingActivities");
+    let financing_cash_flow =
+        extract_range_value(&doc, "NetCashProvidedByUsedInFinancingActivities");
 
-    // Return statement
+    // Return statements
     Ok(edgar::StatementRes {
         cik: cik.to_string(),
         outstanding_stock,
@@ -104,7 +112,7 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
     })
 }
 
-fn extract(doc: &roxmltree::Document, tag: &str) -> Vec<edgar::StatementItem> {
+fn extract_date_value(doc: &roxmltree::Document, tag: &str) -> Vec<edgar::StatementItem> {
     let mut result = xbrl::Group::extract(doc, tag, true)
         .to_vec_date_and_value()
         .into_iter()
@@ -113,6 +121,22 @@ fn extract(doc: &roxmltree::Document, tag: &str) -> Vec<edgar::StatementItem> {
     if result.is_empty() {
         result = xbrl::Group::extract(doc, tag, false)
             .to_vec_date_and_value()
+            .into_iter()
+            .map(edgar::StatementItem::from)
+            .collect::<Vec<edgar::StatementItem>>();
+    }
+    result
+}
+
+fn extract_range_value(doc: &roxmltree::Document, tag: &str) -> Vec<edgar::StatementItem> {
+    let mut result = xbrl::Group::extract(doc, tag, true)
+        .to_vec_range_and_value()
+        .into_iter()
+        .map(edgar::StatementItem::from)
+        .collect::<Vec<edgar::StatementItem>>();
+    if result.is_empty() {
+        result = xbrl::Group::extract(doc, tag, false)
+            .to_vec_range_and_value()
             .into_iter()
             .map(edgar::StatementItem::from)
             .collect::<Vec<edgar::StatementItem>>();

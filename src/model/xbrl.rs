@@ -39,7 +39,21 @@ impl<'a, 'input> Group<'a, 'input> {
     pub fn to_vec_date_and_value(&'a self) -> Vec<(Period, String)> {
         let mut temp: HashMap<String, (Period, String)> = HashMap::new();
         for element in self.transpose() {
-            if element.no_segment() {
+            if element.no_segment() && element.context.period.date.is_some() {
+                let k = element.context.id.to_string();
+                let v1 = element.context.period.clone();
+                let v2 = element.text.unwrap().to_string();
+                temp.entry(k).or_insert((v1, v2));
+            }
+        }
+        let r: Vec<(Period, String)> = temp.values().cloned().collect();
+        r
+    }
+
+    pub fn to_vec_range_and_value(&'a self) -> Vec<(Period, String)> {
+        let mut temp: HashMap<String, (Period, String)> = HashMap::new();
+        for element in self.transpose() {
+            if element.no_segment() && element.context.period.end_date.is_some() {
                 let k = element.context.id.to_string();
                 let v1 = element.context.period.clone();
                 let v2 = element.text.unwrap().to_string();
@@ -56,7 +70,7 @@ impl<'a, 'input> Group<'a, 'input> {
     ) -> Vec<(Period, String)> {
         let mut temp: HashMap<String, (Period, String)> = HashMap::new();
         for element in self.transpose() {
-            if element.is_segment(seg_text) {
+            if element.is_segment(seg_text) && element.context.period.date.is_some() {
                 let k = element.context.id.to_string();
                 let v1 = element.context.period.clone();
                 let v2 = element.text.unwrap().to_string();
@@ -66,6 +80,23 @@ impl<'a, 'input> Group<'a, 'input> {
         let r: Vec<(Period, String)> = temp.values().cloned().collect();
         r
     }
+
+    // pub fn to_vec_range_and_value_with_segment(
+    //     &'a self,
+    //     seg_text: &'a str,
+    // ) -> Vec<(Period, String)> {
+    //     let mut temp: HashMap<String, (Period, String)> = HashMap::new();
+    //     for element in self.transpose() {
+    //         if element.is_segment(seg_text) && element.context.period.end_date.is_some() {
+    //             let k = element.context.id.to_string();
+    //             let v1 = element.context.period.clone();
+    //             let v2 = element.text.unwrap().to_string();
+    //             temp.entry(k).or_insert((v1, v2));
+    //         }
+    //     }
+    //     let r: Vec<(Period, String)> = temp.values().cloned().collect();
+    //     r
+    // }
 
     fn transpose(&'a self) -> Vec<ElementSingle<'a>> {
         self.nodes
