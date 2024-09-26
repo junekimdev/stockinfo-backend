@@ -14,7 +14,7 @@ reqwest = { version = "0.12", features = ["json", "blocking"] }
 # DB
 tokio-postgres = {version = "0.7", features = ["with-uuid-1", "with-time-0_3"]}
 deadpool-postgres ={version = "0.14", features = ["serde"]}
-deadpool-redis = {version = "0.17", features = ["rt_tokio_1", "serde"]}
+deadpool-redis = {version = "0.18", features = ["rt_tokio_1", "serde"]}
 
 # logging & tracing
 tracing = "0.1"
