@@ -47,6 +47,9 @@ pub struct StatementRes {
     pub operating_income: Vec<StatementItem>,
     pub net_income: Vec<StatementItem>,
     pub comprehensive_income: Vec<StatementItem>,
+    pub operating_cash_flow: Vec<StatementItem>,
+    pub investing_cash_flow: Vec<StatementItem>,
+    pub financing_cash_flow: Vec<StatementItem>,
 }
 
 impl redis::ToRedisArgs for StatementRes {
