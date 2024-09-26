@@ -7,15 +7,12 @@ use deadpool_redis::redis;
 pub struct Submissions {
     pub cik: String,
     pub name: String,
-    pub entity_type: String,
-    pub sic: String,
-    pub sic_description: String,
     pub tickers: Vec<String>,
     pub exchanges: Vec<String>,
-    pub ein: String,
     pub fiscal_year_end: String,
-    pub state_of_incorporation: String,
     pub filings: SubmissionsFilings,
+    #[serde(flatten)]
+    pub _extra: serde_json::Value,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

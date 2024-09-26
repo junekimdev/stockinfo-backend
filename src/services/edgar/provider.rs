@@ -18,7 +18,8 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
         .send()
         .await?
         .json::<edgar::Submissions>()
-        .await?;
+        .await
+        .expect("Valid edgar submission response");
 
     // Find index of the latest annual report
     let mut index = 0;
