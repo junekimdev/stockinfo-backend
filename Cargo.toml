@@ -20,12 +20,12 @@ deadpool-redis = {version = "0.18", features = ["rt_tokio_1", "serde"]}
 tracing = "0.1"
 tracing-subscriber = {version = "0.3", features = ["env-filter", "registry"] }
 tracing-actix-web = "0.7"
-tracing-opentelemetry = "0.25"
+tracing-opentelemetry = "0.27"
 
 # opentelemetry
-opentelemetry = "0.24"
-opentelemetry_sdk = {version = "0.24",features = ["rt-tokio"]}
-opentelemetry-otlp = "0.17"
+opentelemetry = "0.26"
+opentelemetry_sdk = {version = "0.26",features = ["rt-tokio"]}
+opentelemetry-otlp = "0.26"
 
 # files
 zip = "2.2"
