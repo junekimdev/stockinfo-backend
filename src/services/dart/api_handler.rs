@@ -3,14 +3,12 @@ use crate::model::dart;
 use crate::utils::{cache, error::Error, Result};
 
 #[tracing::instrument(err)]
-#[actix_web::get("/dart/code/{name}")]
+#[actix_web::get("/dart/code/{stock_code}")]
 pub async fn handler_get_code(
     req: actix_web::HttpRequest,
-    name: actix_web::web::Path<String>,
+    stock_code: actix_web::web::Path<String>,
 ) -> Result<actix_web::HttpResponse> {
-    let decoded_name = urlencoding::decode(&name)?;
-
-    let res = provider::get_dart_code(&decoded_name).await?;
+    let res = provider::get_dart_code(&stock_code).await?;
 
     // Return result
     Ok(actix_web::HttpResponse::Ok().body(res))

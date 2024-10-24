@@ -42,6 +42,7 @@ pub async fn build_code_db() -> Result<()> {
         if child.is_element() {
             let mut code = String::new();
             let mut name = String::new();
+            let mut stock = String::new();
             let mut date = String::new();
             let elements: Vec<roxmltree::Node> =
                 child.children().filter(move |v| v.is_element()).collect();
@@ -50,28 +51,33 @@ pub async fn build_code_db() -> Result<()> {
                 match el.tag_name().name() {
                     "corp_code" => code = el.text().unwrap().to_string(),
                     "corp_name" => name = el.text().unwrap().to_string(),
+                    "stock_code" => stock = el.text().unwrap().to_string(),
                     "modify_date" => date = el.text().unwrap().to_string(),
                     _ => (),
                 }
             }
 
-            let date_parsed = match time::Date::parse(&date, &format) {
-                Ok(d) => Ok(d),
-                Err(e) => Err(Error::General(e.to_string())),
-            }?;
+            // Add dart codes only if the company is listed on stock market
+            if !stock.is_empty() || stock != " " {
+                let date_parsed = match time::Date::parse(&date, &format) {
+                    Ok(d) => Ok(d),
+                    Err(e) => Err(Error::General(e.to_string())),
+                }?;
 
-            codes.push(dart::Code {
-                corp_code: code,
-                corp_name: name,
-                modify_date: date_parsed,
-            });
+                codes.push(dart::Code {
+                    corp_code: code,
+                    corp_name: name,
+                    stock_code: stock,
+                    modify_date: date_parsed,
+                });
+            }
         }
     }
 
     // Store data in DB
     const SQL_CLEAR: &str = "TRUNCATE TABLE dart_code RESTART IDENTITY";
     const SQL_INSERT: &str =
-        "INSERT INTO dart_code(code,name,date) VALUES ($1::CHAR(8), $2::TEXT, $3::DATE);";
+        "INSERT INTO dart_code(code,stock_code,name,date) VALUES ($1::CHAR(8), $2::CHAR(6), $3::TEXT, $4::DATE);";
 
     let mut db_client = db::pool().get().await?;
     let transaction = db_client.transaction().await?;
@@ -83,7 +89,12 @@ pub async fn build_code_db() -> Result<()> {
         transaction
             .query(
                 &sql_insert,
-                &[&item.corp_code, &item.corp_name, &item.modify_date],
+                &[
+                    &item.corp_code,
+                    &item.stock_code,
+                    &item.corp_name,
+                    &item.modify_date,
+                ],
             )
             .await?;
     }
@@ -93,10 +104,10 @@ pub async fn build_code_db() -> Result<()> {
 }
 
 #[tracing::instrument(err)]
-pub async fn get_dart_code(name: &str) -> Result<String> {
-    const SQL: &str = "SELECT * FROM dart_code WHERE name=$1::TEXT ORDER BY date DESC;";
+pub async fn get_dart_code(stock_code: &str) -> Result<String> {
+    const SQL: &str = "SELECT * FROM dart_code WHERE stock_code=$1::CHAR(6) ORDER BY date DESC;";
 
-    let rows = db::query(SQL, &[&name]).await?;
+    let rows = db::query(SQL, &[&stock_code]).await?;
     if rows.is_empty() {
         return Err(Error::E404NotFound("dart code".into()));
     }
