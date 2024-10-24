@@ -29,6 +29,7 @@ CREATE TABLE company (
 CREATE TABLE dart_code (
   id SERIAL PRIMARY KEY,
   code CHAR(8),
+  stock_code CHAR(6),
   name TEXT,
   date DATE
 );

@@ -6,6 +6,7 @@ use deadpool_redis::redis;
 pub struct Code {
     pub corp_code: String,
     pub corp_name: String,
+    pub stock_code: String,
     pub modify_date: time::Date,
 }
 
