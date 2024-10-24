@@ -42,10 +42,23 @@
 
 ### Initial DB Build
 
+```shell
+curl -X POST -d {} <URL_API>/v1/companies
+curl -X POST -d {} <URL_API>/v1/dart/code
+curl -X POST -d {} <URL_API>/v1/tickers
+```
+
+### Edit crontab
+
+- Open crontab editor: `crontab -e`
+- Schedule API executions for cleaning process
+
   ```shell
-  curl -X POST <URL_API>/v1/companies
-  curl -X POST <URL_API>/v1/dart/code
-  curl -X POST <URL_API>/v1/tickers
+  0 0 * * * curl -X DELETE <URL_API>/v1/prices &> /dev/null
+  0 5 * * * curl -X DELETE <URL_API>/v1/prices_us &> /dev/null
+  0 18 * * 6 curl -X POST -d {} <URL_API>/v1/companies &> /dev/null
+  30 18 * * 6 curl -X POST -d {} <URL_API>/v1/dart/code &> /dev/null
+  0 19 * * 6 curl -X POST -d {} <URL_API>/v1/tickers &> /dev/null
   ```
 
 ## Authors
