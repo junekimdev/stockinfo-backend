@@ -58,7 +58,7 @@ pub async fn build_code_db() -> Result<()> {
             }
 
             // Add dart codes only if the company is listed on stock market
-            if !stock.is_empty() || stock != " " {
+            if !stock.is_empty() && stock != " " {
                 let date_parsed = match time::Date::parse(&date, &format) {
                     Ok(d) => Ok(d),
                     Err(e) => Err(Error::General(e.to_string())),
