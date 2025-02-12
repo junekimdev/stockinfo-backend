@@ -29,7 +29,7 @@
   POSTGRES_USER=stockinfo
   POSTGRES_DB=stockinfo
   POSTGRES_PASSWORD=super-secret-password
-  POSTGRES_INITDB_ARGS="--encoding=UTF-8 --lc-collate=C --lc-ctype=en_US.UTF-8"
+  POSTGRES_INITDB_ARGS="--lc-collate=C --lc-ctype=en_US.UTF-8"
   ```
 
 - Add a file `production.toml` under `/config` by modifying `default.toml` with proper values
