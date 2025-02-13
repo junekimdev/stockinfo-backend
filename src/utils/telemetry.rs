@@ -12,31 +12,33 @@ impl OpenTelemetry {
     #[tracing::instrument]
     pub fn new(app_name: &str, app_version: &str) -> OpenTelemetry {
         // tracing with opentelemetry + jaeger
-        let jaeger_exporter = opentelemetry_otlp::new_exporter()
-            .tonic()
-            .with_endpoint(settings::Settings::instance().jaeger.agent_endpoint.clone())
-            .with_timeout(std::time::Duration::from_secs(3));
 
-        let tracer_config = trace::Config::default()
+        let version = opentelemetry::KeyValue::new("service.version", app_version.to_string());
+        let resource = opentelemetry_sdk::Resource::builder()
+            .with_attribute(version)
+            .build();
+        let end_point = settings::Settings::instance().jaeger.agent_endpoint.clone();
+
+        let exporter = opentelemetry_otlp::SpanExporter::builder()
+            .with_tonic()
+            .with_endpoint(end_point)
+            .with_timeout(std::time::Duration::from_secs(3))
+            .build()
+            .expect("failed to build opentelemetry exporter");
+
+        let provider = trace::SdkTracerProvider::builder()
+            .with_batch_exporter(exporter)
             .with_sampler(trace::Sampler::AlwaysOn)
             .with_id_generator(trace::RandomIdGenerator::default())
             .with_max_events_per_span(64)
             .with_max_attributes_per_span(16)
             .with_max_events_per_span(16)
-            .with_resource(opentelemetry_sdk::Resource::new(vec![
-                opentelemetry::KeyValue::new("service.name", app_name.to_string()),
-                opentelemetry::KeyValue::new("service.version", app_version.to_string()),
-            ]));
+            .with_resource(resource)
+            .build();
 
-        let jaeger_tracer = opentelemetry_otlp::new_pipeline()
-            .tracing()
-            .with_exporter(jaeger_exporter)
-            .with_trace_config(tracer_config)
-            .install_batch(opentelemetry_sdk::runtime::Tokio)
-            .expect("failed to install OpenTelemetry tracer")
-            .tracer("opentelemetry-otlp");
+        let tracer = provider.tracer(app_name.to_string());
 
-        let jaeger_layer = tracing_opentelemetry::layer().with_tracer(jaeger_tracer);
+        let jaeger_layer = tracing_opentelemetry::layer().with_tracer(tracer);
 
         // metrics with opentelemetry + prometheus
         Self { jaeger_layer }
