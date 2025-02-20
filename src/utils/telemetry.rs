@@ -12,10 +12,10 @@ impl OpenTelemetry {
     #[tracing::instrument]
     pub fn new(app_name: &str, app_version: &str) -> OpenTelemetry {
         // tracing with opentelemetry + jaeger
-
+        let name = opentelemetry::KeyValue::new("service.name", app_name.to_string());
         let version = opentelemetry::KeyValue::new("service.version", app_version.to_string());
         let resource = opentelemetry_sdk::Resource::builder()
-            .with_attribute(version)
+            .with_attributes(vec![name, version])
             .build();
         let end_point = settings::Settings::instance().jaeger.agent_endpoint.clone();
 
