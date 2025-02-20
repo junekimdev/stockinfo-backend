@@ -31,7 +31,7 @@ async fn main() -> std::io::Result<()> {
         actix_web::App::new()
             .wrap(utils::cors::build())
             .wrap(tracing_actix_web::TracingLogger::default())
-            .service(api::build())
+            .service(api::v1::build())
     })
     .bind(server_addr)?
     .run()
