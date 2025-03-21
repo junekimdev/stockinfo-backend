@@ -130,7 +130,7 @@ pub struct ElementSingle<'a> {
     pub text: Option<&'a str>,
 }
 
-impl<'a> ElementSingle<'a> {
+impl ElementSingle<'_> {
     pub fn no_segment(&self) -> bool {
         self.context.entity.segment.is_none()
     }
