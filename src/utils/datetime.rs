@@ -114,7 +114,7 @@ where
 
 struct DateVisitor;
 
-impl<'de> serde::de::Visitor<'de> for DateVisitor {
+impl serde::de::Visitor<'_> for DateVisitor {
     type Value = time::Date;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -196,7 +196,7 @@ where
 
 struct KrxDatetimeVisitor;
 
-impl<'de> serde::de::Visitor<'de> for KrxDatetimeVisitor {
+impl serde::de::Visitor<'_> for KrxDatetimeVisitor {
     type Value = time::OffsetDateTime;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
