@@ -13,9 +13,6 @@ RUN apt-get update \
 
 WORKDIR /app
 
-ARG GIT_HASH
-ENV BUILD_ID=${GIT_HASH}
-
 # Add all files
 COPY ./ ./
 
@@ -26,10 +23,8 @@ RUN cargo build --release --target x86_64-unknown-linux-musl
 ########## Stage 2: Runtime ##########
 FROM alpine:latest
 ARG NAME
-ARG VERSION
 LABEL org.opencontainers.image.authors="godlyjune@gmail.com" \
-      org.opencontainers.image.title="${NAME}/runtime" \
-      org.opencontainers.image.version=${VERSION}
+      org.opencontainers.image.title="${NAME}/runtime"
 
 WORKDIR /app
 
