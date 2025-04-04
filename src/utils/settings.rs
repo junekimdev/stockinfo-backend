@@ -85,6 +85,8 @@ impl Settings {
     pub fn new() -> Result<Self> {
         dotenv::dotenv().ok();
         let mode = std::env::var("RUST_MODE").unwrap_or_else(|_| "default".into());
+        println!("Loading config for {}", mode);
+
         let config_filename = format!("config/{}", mode.to_lowercase());
         let s = config::Config::builder()
             .add_source(config::File::with_name(&config_filename).required(false))
