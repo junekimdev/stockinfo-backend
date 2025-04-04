@@ -1,5 +1,8 @@
 # Stockinfo Backend
 
+![release-version](https://img.shields.io/github/v/release/junekimdev/stockinfo-backend?display_name=tag)
+[![Build Container Image](https://github.com/junekimdev/stockinfo-backend/actions/workflows/docker-publish.yaml/badge.svg)](https://github.com/junekimdev/stockinfo-backend/actions/workflows/docker-publish.yaml)
+
 ## Getting Started
 
 ### Prerequisite
