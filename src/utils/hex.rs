@@ -3,6 +3,7 @@ use std::fmt::Write;
 use std::sync::Arc;
 
 /// Convert bytes into hexastring
+#[allow(unused)]
 #[tracing::instrument(skip_all, err)]
 pub fn encode(bytes: &[u8]) -> Result<Arc<str>> {
     let mut s = String::with_capacity(bytes.len() * 2);
@@ -13,6 +14,7 @@ pub fn encode(bytes: &[u8]) -> Result<Arc<str>> {
 }
 
 /// Convert hexastring into bytes
+#[allow(unused)]
 #[tracing::instrument(skip_all, err)]
 pub fn decode(s: &str) -> Result<Arc<[u8]>> {
     let mut v: Vec<u8> = Vec::new();
