@@ -24,27 +24,6 @@ pub struct Cors {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct GovdataUrl {
-    pub price: String,
-    pub company: String,
-}
-
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct DartUrl {
-    pub statement: String,
-    pub index: String,
-    pub code: String,
-}
-
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct UsStockUrl {
-    pub ticker: String,
-    pub submissions: String,
-    pub edgar: String,
-    pub price: String,
-}
-
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Keys {
     pub data_go_kr: String,
     pub dart: String,
