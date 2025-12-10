@@ -74,6 +74,7 @@ pub async fn get_price_latest(ticker: &str) -> Result<StockUSDayPriceRes> {
         ])
         .send()
         .await?
+        .error_for_status()?
         .json::<web::yahoo::ResBody>()
         .await?;
 
@@ -197,6 +198,7 @@ async fn update_prices_web(
         ])
         .send()
         .await?
+        .error_for_status()?
         .json::<web::yahoo::ResBody>()
         .await?;
 

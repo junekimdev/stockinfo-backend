@@ -173,6 +173,7 @@ async fn fetch_krx_prices_all() -> Result<krx::ResBody> {
         ])
         .send()
         .await?
+        .error_for_status()?
         .json::<web::krx::LatestDateRes>()
         .await?;
 
@@ -196,6 +197,7 @@ async fn fetch_krx_prices_all() -> Result<krx::ResBody> {
         ])
         .send()
         .await?
+        .error_for_status()?
         .json::<web::krx::ResBody>()
         .await?;
 
@@ -238,7 +240,12 @@ async fn update_prices_web(
         ]);
     }
 
-    let res = req.send().await?.json::<StockPrice>().await?;
+    let res = req
+        .send()
+        .await?
+        .error_for_status()?
+        .json::<StockPrice>()
+        .await?;
     if res.response.body.total_count < 1 {
         return Err(Error::E404NotFound("No data found from web".into()));
     }

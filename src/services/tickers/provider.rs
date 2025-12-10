@@ -16,6 +16,7 @@ pub async fn build_ticker_db() -> Result<()> {
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
         .send()
         .await?
+        .error_for_status()?
         .json::<std::collections::HashMap<String, Ticker>>()
         .await?;
 

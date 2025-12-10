@@ -29,6 +29,7 @@ pub async fn build_company_db() -> Result<()> {
         ])
         .send()
         .await?
+        .error_for_status()?
         .json::<StockCompany>()
         .await?;
 
@@ -49,6 +50,7 @@ pub async fn build_company_db() -> Result<()> {
             ])
             .send()
             .await?
+            .error_for_status()?
             .json::<StockCompany>()
             .await?;
     }
