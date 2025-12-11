@@ -19,6 +19,7 @@ FROM alpine:latest
 ARG NAME
 LABEL org.opencontainers.image.description="Backend for JK Stock website" \
       org.opencontainers.image.authors="godlyjune@gmail.com" \
+      org.opencontainers.image.base.name="alpine:latest" \
       org.opencontainers.image.title=${NAME}
 
 WORKDIR /app
