@@ -9,11 +9,11 @@ use tracing_subscriber::prelude::*;
 #[tracing::instrument]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
-    let app_name = std::env::var("CARGO_PKG_NAME").unwrap_or("app".to_string());
-    let app_version = std::env::var("CARGO_PKG_VERSION").unwrap_or("0.0.0".to_string());
+    let app_name = env!("CARGO_PKG_NAME");
+    let app_version = env!("CARGO_PKG_VERSION");
 
     // trace with jaeger
-    let otel = utils::telemetry::OpenTelemetry::new(&app_name, &app_version);
+    let otel = utils::telemetry::OpenTelemetry::new(app_name, app_version);
     let env_filter = tracing_subscriber::filter::EnvFilter::builder()
         .with_default_directive(tracing_subscriber::filter::LevelFilter::INFO.into())
         .from_env_lossy();

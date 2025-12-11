@@ -8,7 +8,6 @@ TAG=1.3.8
 build:
 	docker build \
 	--build-arg NAME=$(NAME) \
-	--build-arg VERSION=$(TAG) \
 	-t ghcr.io/junekimdev/$(NAME):$(TAG) .
 
 # This updates local repo
