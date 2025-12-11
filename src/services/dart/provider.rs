@@ -147,6 +147,7 @@ pub async fn get_index(
         ])
         .send()
         .await?
+        .error_for_status()?
         .json::<dart::IndexRes>()
         .await?;
 
@@ -163,6 +164,7 @@ pub async fn get_index(
             ])
             .send()
             .await?
+            .error_for_status()?
             .json::<dart::IndexRes>()
             .await?;
     }
@@ -200,6 +202,7 @@ pub async fn get_statement(
         ])
         .send()
         .await?
+        .error_for_status()?
         .json::<dart::StatementRes>()
         .await?;
 
@@ -216,6 +219,7 @@ pub async fn get_statement(
             ])
             .send()
             .await?
+            .error_for_status()?
             .json::<dart::StatementRes>()
             .await?;
     }

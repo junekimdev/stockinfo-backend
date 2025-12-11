@@ -23,11 +23,12 @@ where
 
 #[allow(unused)]
 #[tracing::instrument(skip_all)]
-pub fn serialize_to_bytes<'a>(object: &'a impl serde::Serialize) -> Result<std::sync::Arc<[u8]>> {
+pub fn serialize_to_bytes(object: &impl serde::Serialize) -> Result<std::sync::Arc<[u8]>> {
     let v = serde_json::to_string(object)?.as_bytes().to_owned();
     Ok(std::sync::Arc::from(v))
 }
 
+#[allow(unused)]
 #[tracing::instrument(skip_all)]
 pub fn deserialize<'a, T>(data: &'a str) -> Result<T>
 where

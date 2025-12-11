@@ -17,6 +17,7 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
         .send()
         .await?
+        .error_for_status()?
         .json::<edgar::Submissions>()
         .await
         .expect("Valid edgar submission response");
@@ -49,6 +50,7 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
         .header(reqwest::header::ACCEPT, "application/xml;charset=UTF-8")
         .send()
         .await?
+        .error_for_status()?
         .text()
         .await?;
 

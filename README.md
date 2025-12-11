@@ -19,8 +19,23 @@
   ```
 
 - Install `Docker`
-
 - Install `Make`
+- Install `OpenSSL`
+  - for Windows:
+    - Use `vcpkg` to install `OpenSSL`
+    - Set `OPENSSL_DIR` environment variable to its installed path
+      - or set `OPENSSL_LIB_DIR` and `OPENSSL_INCLUDE_DIR` environment variables to its installed path
+    - Set the `VCPKGRS_DYNAMIC` environment variable to `1` to instruct the `openssl-sys` crate to use dynamic linking
+  - for Debian and Ubuntu:
+    - `sudo apt-get install pkg-config libssl-dev`
+  - for Alpine Linux:
+    - `apk add pkgconf openssl-dev`
+  - for Arch Linux:
+    - `sudo pacman -S pkgconf openssl`
+  - for macOS
+    - Use Homebrew: `brew install openssl@3`
+      - or use MacPorts: `sudo port install openssl`
+      - or use pkgsrc: `sudo pkgin install openssl`
 
 ### Prep env and config
 
@@ -40,8 +55,7 @@
 ### Build
 
 - Build docker image by running `make` in your terminal
-
-- Or, Run `cargo build`
+  - or run `cargo build`
 
 ### Initial DB Build
 
