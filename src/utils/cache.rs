@@ -50,7 +50,7 @@ pub async fn get<T: FromRedisValue>(k: &str) -> Result<T> {
 }
 
 fn get_key_prefixed(k: &str) -> String {
-    let app_name = std::env::var("CARGO_PKG_NAME").unwrap_or("app".to_string());
-    let app_version = std::env::var("CARGO_PKG_VERSION").unwrap_or("0.0.0".to_string());
-    app_name + "_" + &app_version + ":" + k
+    let app_name = env!("CARGO_PKG_NAME");
+    let app_version = env!("CARGO_PKG_VERSION");
+    format!("{}_{}:{}", app_name, app_version, k)
 }

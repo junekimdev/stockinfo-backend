@@ -17,9 +17,9 @@ RUN cargo build --release --target x86_64-unknown-linux-musl
 ########## Stage 2: Runtime ##########
 FROM alpine:latest
 ARG NAME
-ARG VERSION
 LABEL org.opencontainers.image.description="Backend for JK Stock website" \
       org.opencontainers.image.authors="godlyjune@gmail.com" \
+      org.opencontainers.image.base.name="alpine:latest" \
       org.opencontainers.image.title=${NAME}
 
 WORKDIR /app
@@ -31,7 +31,5 @@ COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/${NAME} ./app-
 VOLUME [ "/app/config" ]
 
 ENV RUST_MODE=production
-ENV APP_CARGO_PKG_NAME=${NAME}
-ENV APP_CARGO_PKG_VERSION=${VERSION}
 EXPOSE 4000
 CMD ["./app-exe"]
