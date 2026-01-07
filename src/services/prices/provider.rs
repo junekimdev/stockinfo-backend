@@ -151,21 +151,50 @@ pub async fn clear_prices() -> Result<()> {
 
 #[tracing::instrument(err)]
 async fn fetch_krx_prices_all() -> Result<krx::ResBody> {
-    let web_client = reqwest::Client::new();
     let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
+    let url_login = Settings::instance().urls.kr_krx_login.clone();
     let url_date = Settings::instance().urls.kr_krx_price_date.clone();
-    let url = Settings::instance().urls.kr_krx_price.clone();
-    let referer = Settings::instance().urls.kr_krx_price_referer.clone();
-    let req_url = reqwest::Url::parse(&url).unwrap();
-    let host = req_url.host_str().unwrap();
+    let url_price = Settings::instance().urls.kr_krx_price.clone();
+    let referer_login = Settings::instance().urls.kr_krx_login_referer.clone();
+    let referer_price = Settings::instance().urls.kr_krx_price_referer.clone();
+    let login_id = Settings::instance().keys.krx_id.clone();
+    let login_pw = Settings::instance().keys.krx_pw.clone();
+
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert(reqwest::header::USER_AGENT, agent.parse().unwrap());
+    headers.insert(
+        reqwest::header::ACCEPT,
+        "application/json;charset=UTF-8".parse().unwrap(),
+    );
+    headers.insert(
+        reqwest::header::HOST,
+        reqwest::Url::parse(&url_price)
+            .unwrap()
+            .host_str()
+            .unwrap()
+            .parse()
+            .unwrap(),
+    );
+
+    // Get a client with cookie store
+    let web_client = reqwest::ClientBuilder::new()
+        .cookie_store(true)
+        .default_headers(headers)
+        .build()?;
+
+    // Login to data.krx.co.kr
+    web_client
+        .post(url_login)
+        .header(reqwest::header::REFERER, &referer_login)
+        .form(&[("mbrId", login_id), ("pw", login_pw)])
+        .send()
+        .await?
+        .error_for_status()?;
 
     // Get latest date of the data from KRX
     let res = web_client
         .get(url_date)
-        .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, &agent)
-        .header(reqwest::header::REFERER, &referer)
-        .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
+        .header(reqwest::header::REFERER, &referer_price)
         .query(&[
             ("baseName", "krx.mdc.i18n.component"),
             ("key", "B128.bld"),
@@ -181,11 +210,8 @@ async fn fetch_krx_prices_all() -> Result<krx::ResBody> {
 
     // Fetch data from internet
     let res = web_client
-        .post(req_url.clone())
-        .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, &agent)
-        .header(reqwest::header::REFERER, &referer)
-        .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
+        .post(url_price)
+        .header(reqwest::header::REFERER, &referer_price)
         .form(&[
             ("bld", "dbms/MDC/STAT/standard/MDCSTAT01501"),
             ("locale", "ko_KR"),

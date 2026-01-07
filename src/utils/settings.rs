@@ -27,12 +27,16 @@ pub struct Cors {
 pub struct Keys {
     pub data_go_kr: String,
     pub dart: String,
+    pub krx_id: String,
+    pub krx_pw: String,
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Urls {
     pub kr_price: String,
     pub kr_company: String,
+    pub kr_krx_login: String,
+    pub kr_krx_login_referer: String,
     pub kr_krx_price: String,
     pub kr_krx_price_referer: String,
     pub kr_krx_price_date: String,

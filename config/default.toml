@@ -28,10 +28,14 @@ pool = { max_size = 10, timeouts.wait = { secs = 2, nanos = 0 }}
 [keys]
 data_go_kr = "key"
 dart = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+krx_id = "krx_id"
+krx_pw = "krx_pw"
 
 [urls]
 kr_price = "https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo"
 kr_company = "https://apis.data.go.kr/1160100/service/GetKrxListedInfoService/getItemInfo"
+kr_krx_login = "https://data.krx.co.kr/contents/MDC/COMS/client/MDCCOMS001D1.cmd"
+kr_krx_login_referer = "https://data.krx.co.kr/contents/MDC/COMS/client/view/login.jsp?site=mdc"
 kr_krx_price = "http://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd"
 kr_krx_price_referer = "http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020101"
 kr_krx_price_date = "http://data.krx.co.kr/comm/bldAttendant/executeForResourceBundle.cmd"
