@@ -4,7 +4,7 @@ use crate::model::{
     stockprice_us_from_yahoo, web, StockPriceUS, StockUSDayPriceRes, StockUSPriceExistsRes,
     StockUSWeekPrice, StockUSWeeklyPriceRes,
 };
-use crate::utils::{datetime::get_sunday_of_week, db, settings::Settings, Result};
+use crate::utils::{datetime::get_sunday_of_week, db, http, settings::Settings, Result};
 
 type WeeklyPriceHashMap = std::collections::HashMap<(i32, u8), Vec<StockPriceUS>>;
 
@@ -44,7 +44,6 @@ pub async fn update_price_db(ticker: &str) -> Result<()> {
 
 #[tracing::instrument(err)]
 pub async fn get_price_latest(ticker: &str) -> Result<StockUSDayPriceRes> {
-    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let url = Settings::instance().urls.us_price.clone() + "/" + ticker;
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
@@ -55,12 +54,9 @@ pub async fn get_price_latest(ticker: &str) -> Result<StockUSDayPriceRes> {
     let now = time::OffsetDateTime::now_utc().unix_timestamp().to_string();
 
     // Get all codes
-    let res = reqwest::Client::new()
-        .get(req_url.clone())
-        .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, agent)
-        .header(reqwest::header::ACCEPT, "application/json")
-        .query(&[
+    let req_url_with_params = reqwest::Url::parse_with_params(
+        &url,
+        &[
             ("symbol", ticker),
             ("period1", prev_week.as_str()),
             ("period2", now.as_str()),
@@ -71,7 +67,14 @@ pub async fn get_price_latest(ticker: &str) -> Result<StockUSDayPriceRes> {
             ("lang", "en-US"),
             ("region", "US"),
             ("corsDomain", "finance.yahoo.com"),
-        ])
+        ],
+    )
+    .unwrap();
+
+    let res = http::client()
+        .get(req_url_with_params)
+        .header(reqwest::header::HOST, host)
+        .header(reqwest::header::ACCEPT, "application/json")
         .send()
         .await?
         .error_for_status()?
@@ -157,7 +160,6 @@ async fn update_prices_web(
     ticker: &str,
     date_from: Option<time::Date>,
 ) -> Result<Vec<StockPriceUS>> {
-    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let url = Settings::instance().urls.us_price.clone() + "/" + ticker;
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
@@ -179,12 +181,9 @@ async fn update_prices_web(
         .to_string();
 
     // Get all codes
-    let res = reqwest::Client::new()
-        .get(req_url.clone())
-        .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, agent)
-        .header(reqwest::header::ACCEPT, "application/json")
-        .query(&[
+    let req_url_with_params = reqwest::Url::parse_with_params(
+        &url,
+        &[
             ("symbol", ticker),
             ("period1", &start_day),
             ("period2", &prev_day),
@@ -195,7 +194,14 @@ async fn update_prices_web(
             ("lang", "en-US"),
             ("region", "US"),
             ("corsDomain", "finance.yahoo.com"),
-        ])
+        ],
+    )
+    .unwrap();
+
+    let res = http::client()
+        .get(req_url_with_params)
+        .header(reqwest::header::HOST, host)
+        .header(reqwest::header::ACCEPT, "application/json")
         .send()
         .await?
         .error_for_status()?

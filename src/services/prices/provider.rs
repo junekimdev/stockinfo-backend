@@ -3,7 +3,7 @@ use crate::model::{
     StockWeekPrice, StockWeeklyPriceRes,
 };
 use crate::utils::{
-    cache, datetime::get_sunday_of_week, db, error::Error, settings::Settings, Result,
+    cache, datetime::get_sunday_of_week, db, error::Error, http, settings::Settings, Result,
 };
 use rust_decimal::prelude::*;
 
@@ -235,43 +235,48 @@ async fn update_prices_web(
     stock_code: &str,
     date_from: Option<time::Date>,
 ) -> Result<Vec<StockPriceItem>> {
-    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let key = Settings::instance().keys.data_go_kr.clone();
     let url = Settings::instance().urls.kr_price.clone();
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
 
     // Get all prices
-    let mut req = reqwest::Client::new()
-        .get(req_url.clone())
-        .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, agent)
-        .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8");
-
-    if let Some(from) = date_from {
+    let req_url_with_params = if let Some(from) = date_from {
         let date_format = time::macros::format_description!("[year][month][day]");
-        req = req.query(&[
-            ("serviceKey", key.as_str()),
-            ("resultType", "json"),
-            ("numOfRows", "1000000"),
-            ("likeSrtnCd", stock_code),
-            ("beginBasDt", from.format(&date_format)?.as_str()),
-        ]);
+        reqwest::Url::parse_with_params(
+            &url,
+            &[
+                ("serviceKey", key.as_str()),
+                ("resultType", "json"),
+                ("numOfRows", "1000000"),
+                ("likeSrtnCd", stock_code),
+                ("beginBasDt", from.format(&date_format)?.as_str()),
+            ],
+        )
+        .unwrap()
     } else {
-        req = req.query(&[
-            ("serviceKey", key.as_str()),
-            ("resultType", "json"),
-            ("numOfRows", "1000000"),
-            ("likeSrtnCd", stock_code),
-        ]);
-    }
+        reqwest::Url::parse_with_params(
+            &url,
+            &[
+                ("serviceKey", key.as_str()),
+                ("resultType", "json"),
+                ("numOfRows", "1000000"),
+                ("likeSrtnCd", stock_code),
+            ],
+        )
+        .unwrap()
+    };
 
-    let res = req
+    let res = http::client()
+        .get(req_url_with_params)
+        .header(reqwest::header::HOST, host)
+        .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
         .send()
         .await?
         .error_for_status()?
         .json::<StockPrice>()
         .await?;
+
     if res.response.body.total_count < 1 {
         return Err(Error::E404NotFound("No data found from web".into()));
     }
