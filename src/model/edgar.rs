@@ -49,6 +49,8 @@ pub struct StatementRes {
     pub financing_cash_flow: Vec<StatementItem>,
 }
 
+impl redis::ToSingleRedisArg for StatementRes {}
+
 impl redis::ToRedisArgs for StatementRes {
     fn write_redis_args<W>(&self, out: &mut W)
     where
@@ -59,20 +61,16 @@ impl redis::ToRedisArgs for StatementRes {
 }
 
 impl redis::FromRedisValue for StatementRes {
-    fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
-        match *v {
+    fn from_redis_value(v: redis::Value) -> Result<Self, redis::ParsingError> {
+        match v {
             redis::Value::BulkString(ref bytes) => {
                 let msg = std::str::from_utf8(bytes)?;
                 let object = serde_json::from_str::<Self>(msg).unwrap();
                 Ok(object)
             }
-            _ => Err(redis::RedisError::from((
-                redis::ErrorKind::TypeError,
-                "Response was of incompatible type",
-                format!(
-                    "{:?} (response was {:?})",
-                    "Response type not edgar::StatementRes compatible", v
-                ),
+            _ => Err(redis::ParsingError::from(format!(
+                "{:?} (response was {:?})",
+                "Response type not edgar::StatementRes compatible", v
             ))),
         }
     }
