@@ -4,6 +4,7 @@ pub mod datetime;
 pub mod db;
 pub mod error;
 pub mod hex;
+pub mod http;
 pub mod settings;
 pub mod telemetry;
 

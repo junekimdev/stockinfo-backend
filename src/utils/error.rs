@@ -26,6 +26,7 @@ pub enum Error {
     RedisPool(deadpool_redis::PoolError),
     Redis(deadpool_redis::redis::RedisError),
     Reqwest(reqwest::Error),
+    ReqwestMiddleware(reqwest_middleware::Error),
     TimeFormat(time::error::Format),
     TimeParse(time::error::Parse),
     TimeComponentRange(time::error::ComponentRange),
@@ -75,6 +76,7 @@ impl std::fmt::Display for Error {
             RedisPool(e) => e.fmt(f),
             Redis(e) => e.fmt(f),
             Reqwest(e) => e.fmt(f),
+            ReqwestMiddleware(e) => e.fmt(f),
             TimeFormat(e) => e.fmt(f),
             TimeParse(e) => e.fmt(f),
             TimeComponentRange(e) => e.fmt(f),
@@ -238,6 +240,12 @@ impl From<deadpool_redis::redis::RedisError> for Error {
 impl From<reqwest::Error> for Error {
     fn from(err: reqwest::Error) -> Self {
         Self::Reqwest(err)
+    }
+}
+
+impl From<reqwest_middleware::Error> for Error {
+    fn from(err: reqwest_middleware::Error) -> Self {
+        Self::ReqwestMiddleware(err)
     }
 }
 
