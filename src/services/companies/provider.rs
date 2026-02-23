@@ -1,10 +1,8 @@
 use crate::model::{StockCompany, StockCompanySearchRes};
-use crate::utils::{db, error::Error, settings::Settings, Result};
+use crate::utils::{db, error::Error, http, settings::Settings, Result};
 
 #[tracing::instrument(err)]
 pub async fn build_company_db() -> Result<()> {
-    let web_client = reqwest::Client::new();
-    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let key = Settings::instance().keys.data_go_kr.clone();
     let url = Settings::instance().urls.kr_company.clone();
     let req_url = reqwest::Url::parse(&url).unwrap();
@@ -15,18 +13,22 @@ pub async fn build_company_db() -> Result<()> {
         .previous_day()
         .unwrap();
 
-    // Get all codes
-    let mut res = web_client
-        .get(req_url.clone())
-        .header(reqwest::header::HOST, host)
-        .header(reqwest::header::USER_AGENT, agent.clone())
-        .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
-        .query(&[
+    let mut req_url_with_params = reqwest::Url::parse_with_params(
+        &url,
+        &[
             ("serviceKey", key.as_str()),
             ("resultType", "json"),
             ("basDt", base_date.format(&format)?.as_str()),
             ("numOfRows", "1000000"),
-        ])
+        ],
+    )
+    .unwrap();
+
+    // Get all codes
+    let mut res = http::client()
+        .get(req_url_with_params.clone())
+        .header(reqwest::header::HOST, host)
+        .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
         .send()
         .await?
         .error_for_status()?
@@ -37,17 +39,21 @@ pub async fn build_company_db() -> Result<()> {
     while res.response.body.total_count < 1 {
         base_date = base_date.previous_day().unwrap();
 
-        res = web_client
-            .get(req_url.clone())
-            .header(reqwest::header::HOST, host)
-            .header(reqwest::header::USER_AGENT, agent.clone())
-            .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
-            .query(&[
+        req_url_with_params = reqwest::Url::parse_with_params(
+            &url,
+            &[
                 ("serviceKey", key.as_str()),
                 ("resultType", "json"),
                 ("basDt", base_date.format(&format)?.as_str()),
                 ("numOfRows", "1000000"),
-            ])
+            ],
+        )
+        .unwrap();
+
+        res = http::client()
+            .get(req_url_with_params)
+            .header(reqwest::header::HOST, host)
+            .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
             .send()
             .await?
             .error_for_status()?

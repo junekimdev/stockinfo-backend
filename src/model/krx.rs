@@ -20,6 +20,8 @@ impl From<super::web::krx::ResBody> for ResBody {
     }
 }
 
+impl redis::ToSingleRedisArg for ResBody {}
+
 impl redis::ToRedisArgs for ResBody {
     fn write_redis_args<W>(&self, out: &mut W)
     where
@@ -30,20 +32,16 @@ impl redis::ToRedisArgs for ResBody {
 }
 
 impl redis::FromRedisValue for ResBody {
-    fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
-        match *v {
+    fn from_redis_value(v: redis::Value) -> Result<Self, redis::ParsingError> {
+        match v {
             redis::Value::BulkString(ref bytes) => {
                 let msg = std::str::from_utf8(bytes)?;
                 let object = serde_json::from_str::<Self>(msg).unwrap();
                 Ok(object)
             }
-            _ => Err(redis::RedisError::from((
-                redis::ErrorKind::TypeError,
-                "Response was of incompatible type",
-                format!(
-                    "{:?} (response was {:?})",
-                    "Response type not krx::ResBody compatible", v
-                ),
+            _ => Err(redis::ParsingError::from(format!(
+                "{:?} (response was {:?})",
+                "Response type not krx::ResBody compatible", v
             ))),
         }
     }
@@ -113,6 +111,8 @@ impl From<super::web::krx::Price> for Price {
     }
 }
 
+impl redis::ToSingleRedisArg for Price {}
+
 impl redis::ToRedisArgs for Price {
     fn write_redis_args<W>(&self, out: &mut W)
     where
@@ -123,20 +123,16 @@ impl redis::ToRedisArgs for Price {
 }
 
 impl redis::FromRedisValue for Price {
-    fn from_redis_value(v: &redis::Value) -> redis::RedisResult<Self> {
-        match *v {
+    fn from_redis_value(v: redis::Value) -> Result<Self, redis::ParsingError> {
+        match v {
             redis::Value::BulkString(ref bytes) => {
                 let msg = std::str::from_utf8(bytes)?;
                 let object = serde_json::from_str::<Self>(msg).unwrap();
                 Ok(object)
             }
-            _ => Err(redis::RedisError::from((
-                redis::ErrorKind::TypeError,
-                "Response was of incompatible type",
-                format!(
-                    "{:?} (response was {:?})",
-                    "Response type not krx::Price compatible", v
-                ),
+            _ => Err(redis::ParsingError::from(format!(
+                "{:?} (response was {:?})",
+                "Response type not krx::Price compatible", v
             ))),
         }
     }

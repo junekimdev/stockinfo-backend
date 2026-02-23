@@ -1,6 +1,6 @@
 use super::{settings, Result};
 use deadpool_redis::{
-    redis::{AsyncCommands, FromRedisValue, ToRedisArgs},
+    redis::{AsyncCommands, FromRedisValue, ToSingleRedisArg},
     Pool,
 };
 
@@ -21,7 +21,7 @@ pub fn pool() -> &'static Pool {
 #[tracing::instrument(err)]
 pub async fn set<V>(k: &str, v: &V) -> Result<()>
 where
-    V: ToRedisArgs + std::marker::Sync + std::fmt::Debug,
+    V: ToSingleRedisArg + std::marker::Sync + std::fmt::Debug,
 {
     let key = get_key_prefixed(k);
     let mut conn = pool().get().await?;
@@ -33,7 +33,7 @@ where
 #[tracing::instrument(err)]
 pub async fn set_with_timer<V>(k: &str, v: &V, seconds: u64) -> Result<()>
 where
-    V: ToRedisArgs + std::marker::Sync + std::fmt::Debug,
+    V: ToSingleRedisArg + std::marker::Sync + std::fmt::Debug,
 {
     let key = get_key_prefixed(k);
     let mut conn = pool().get().await?;
