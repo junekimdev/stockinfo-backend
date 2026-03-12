@@ -1,38 +1,34 @@
 use crate::model::dart;
-use crate::utils::{db, error::Error, http, settings::Settings, Result};
+use crate::utils::{Result, db, error::Error, http, settings::Settings};
 use std::io::Read;
 
 #[tracing::instrument(err)]
 pub async fn build_code_db() -> Result<()> {
-    let agent = Settings::instance().agent.common.clone() + "/" + env!("CARGO_PKG_VERSION");
     let key = Settings::instance().keys.dart.clone();
     let url = Settings::instance().urls.dart_code.clone();
 
     // Get a file from the internet
-    let res = tokio::task::spawn_blocking(move || {
-        let req_url = reqwest::Url::parse(&url).unwrap();
-        let host = req_url.host_str().unwrap();
-        let mut buf: Vec<u8> = Vec::new();
-        reqwest::blocking::Client::new()
-            .get(req_url.clone())
-            .header(reqwest::header::HOST, host)
-            .header(reqwest::header::USER_AGENT, agent)
-            .header(reqwest::header::ACCEPT, "application/xml;charset=UTF-8")
-            .query(&[("crtfc_key", key.as_str())])
-            .send()
-            .unwrap()
-            .read_to_end(&mut buf)
-            .unwrap();
-        buf
-    })
-    .await?;
+    let req_url_with_params =
+        reqwest::Url::parse_with_params(&url, &[("crtfc_key", key.as_str())]).unwrap();
+    let host = req_url_with_params.host_str().unwrap();
+
+    let buf: Vec<u8> = http::client()
+        .get(req_url_with_params.clone())
+        .header(reqwest::header::HOST, host)
+        .header(reqwest::header::ACCEPT, "application/xml;charset=UTF-8")
+        .send()
+        .await?
+        .error_for_status()?
+        .bytes()
+        .await?
+        .into();
 
     // Unzip the downloaded file
-    let res_reader = std::io::Cursor::new(res);
+    let cursor = std::io::Cursor::new(buf);
     let mut xml_file = String::new();
-    zip::read::ZipArchive::new(res_reader)?
+    zip::read::ZipArchive::new(cursor)?
         .by_name("CORPCODE.xml")?
-        .read_to_string(&mut xml_file)?;
+        .read_to_string(&mut xml_file)?; // use std::io::Read
 
     // Extract data from the file
     let doc = roxmltree::Document::parse(&xml_file)?;
@@ -76,8 +72,7 @@ pub async fn build_code_db() -> Result<()> {
 
     // Store data in DB
     const SQL_CLEAR: &str = "TRUNCATE TABLE dart_code RESTART IDENTITY";
-    const SQL_INSERT: &str =
-        "INSERT INTO dart_code(code,stock_code,name,date) VALUES ($1::CHAR(8), $2::CHAR(6), $3::TEXT, $4::DATE);";
+    const SQL_INSERT: &str = "INSERT INTO dart_code(code,stock_code,name,date) VALUES ($1::CHAR(8), $2::CHAR(6), $3::TEXT, $4::DATE);";
 
     let mut db_client = db::pool().get().await?;
     let transaction = db_client.transaction().await?;
