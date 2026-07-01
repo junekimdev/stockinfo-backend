@@ -1,9 +1,9 @@
 use crate::model::{
-    krx, web, StockDayPrice, StockDayPriceRes, StockPrice, StockPriceExistsRes, StockPriceItem,
-    StockWeekPrice, StockWeeklyPriceRes,
+    StockDayPrice, StockDayPriceRes, StockPrice, StockPriceExistsRes, StockPriceItem,
+    StockWeekPrice, StockWeeklyPriceRes, krx, web,
 };
 use crate::utils::{
-    cache, datetime::get_sunday_of_week, db, error::Error, http, settings::Settings, Result,
+    Result, cache, datetime::get_sunday_of_week, db, error::Error, settings::Settings,
 };
 use rust_decimal::prelude::*;
 
@@ -107,8 +107,7 @@ pub async fn get_price_daily(stock_code: &str) -> Result<StockDayPriceRes> {
 
 #[tracing::instrument(err)]
 pub async fn get_price_weekly(stock_code: &str) -> Result<StockWeeklyPriceRes> {
-    const SQL: &str =
-        "SELECT * from price_weekly WHERE srtn_cd=$1::CHAR(6) ORDER BY opening_date DESC LIMIT 400;";
+    const SQL: &str = "SELECT * from price_weekly WHERE srtn_cd=$1::CHAR(6) ORDER BY opening_date DESC LIMIT 400;";
 
     let mut rows = db::query(SQL, &[&stock_code]).await?;
     if rows.is_empty() {
@@ -235,6 +234,7 @@ async fn update_prices_web(
     stock_code: &str,
     date_from: Option<time::Date>,
 ) -> Result<Vec<StockPriceItem>> {
+    let web_client = reqwest::Client::new();
     let key = Settings::instance().keys.data_go_kr.clone();
     let url = Settings::instance().urls.kr_price.clone();
     let req_url = reqwest::Url::parse(&url).unwrap();
@@ -267,7 +267,7 @@ async fn update_prices_web(
         .unwrap()
     };
 
-    let res = http::client()
+    let res = web_client
         .get(req_url_with_params)
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
@@ -370,7 +370,7 @@ async fn update_weekly_price_db(map: WeeklyPriceHashMap) -> Result<()> {
 
     for (k, mut v) in map {
         let (year, week) = k;
-        v.sort_by(|a, b| a.bas_dt.cmp(&b.bas_dt));
+        v.sort_by_key(|a| a.bas_dt);
 
         let (open, close, high, low, volume, trading_value, base) = aggregate_to_weekly(&v);
 

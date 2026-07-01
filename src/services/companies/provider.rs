@@ -1,8 +1,9 @@
 use crate::model::{StockCompany, StockCompanySearchRes};
-use crate::utils::{db, error::Error, http, settings::Settings, Result};
+use crate::utils::{Result, db, error::Error, settings::Settings};
 
 #[tracing::instrument(err)]
 pub async fn build_company_db() -> Result<()> {
+    let web_client = reqwest::Client::new();
     let key = Settings::instance().keys.data_go_kr.clone();
     let url = Settings::instance().urls.kr_company.clone();
     let req_url = reqwest::Url::parse(&url).unwrap();
@@ -25,7 +26,7 @@ pub async fn build_company_db() -> Result<()> {
     .unwrap();
 
     // Get all codes
-    let mut res = http::client()
+    let mut res = web_client
         .get(req_url_with_params.clone())
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
@@ -50,7 +51,7 @@ pub async fn build_company_db() -> Result<()> {
         )
         .unwrap();
 
-        res = http::client()
+        res = web_client
             .get(req_url_with_params)
             .header(reqwest::header::HOST, host)
             .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
