@@ -1,10 +1,10 @@
 use rust_decimal::prelude::*;
 
 use crate::model::{
-    stockprice_us_from_yahoo, web, StockPriceUS, StockUSDayPriceRes, StockUSPriceExistsRes,
-    StockUSWeekPrice, StockUSWeeklyPriceRes,
+    StockPriceUS, StockUSDayPriceRes, StockUSPriceExistsRes, StockUSWeekPrice,
+    StockUSWeeklyPriceRes, stockprice_us_from_yahoo, web,
 };
-use crate::utils::{datetime::get_sunday_of_week, db, http, settings::Settings, Result};
+use crate::utils::{Result, datetime::get_sunday_of_week, db, settings::Settings};
 
 type WeeklyPriceHashMap = std::collections::HashMap<(i32, u8), Vec<StockPriceUS>>;
 
@@ -44,6 +44,7 @@ pub async fn update_price_db(ticker: &str) -> Result<()> {
 
 #[tracing::instrument(err)]
 pub async fn get_price_latest(ticker: &str) -> Result<StockUSDayPriceRes> {
+    let web_client = reqwest::Client::new();
     let url = Settings::instance().urls.us_price.clone() + "/" + ticker;
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
@@ -71,7 +72,7 @@ pub async fn get_price_latest(ticker: &str) -> Result<StockUSDayPriceRes> {
     )
     .unwrap();
 
-    let res = http::client()
+    let res = web_client
         .get(req_url_with_params)
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::ACCEPT, "application/json")
@@ -113,8 +114,7 @@ pub async fn get_price_daily(ticker: &str) -> Result<StockUSDayPriceRes> {
 
 #[tracing::instrument(err)]
 pub async fn get_price_weekly(ticker: &str) -> Result<StockUSWeeklyPriceRes> {
-    const SQL: &str =
-        "SELECT * from price_us_weekly WHERE ticker=$1::VARCHAR(10) ORDER BY opening_date DESC LIMIT 400;";
+    const SQL: &str = "SELECT * from price_us_weekly WHERE ticker=$1::VARCHAR(10) ORDER BY opening_date DESC LIMIT 400;";
 
     let mut rows = db::query(SQL, &[&ticker]).await?;
     if rows.is_empty() {
@@ -160,6 +160,7 @@ async fn update_prices_web(
     ticker: &str,
     date_from: Option<time::Date>,
 ) -> Result<Vec<StockPriceUS>> {
+    let web_client = reqwest::Client::new();
     let url = Settings::instance().urls.us_price.clone() + "/" + ticker;
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
@@ -198,7 +199,7 @@ async fn update_prices_web(
     )
     .unwrap();
 
-    let res = http::client()
+    let res = web_client
         .get(req_url_with_params)
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::ACCEPT, "application/json")
@@ -278,7 +279,7 @@ async fn update_weekly_price_db(ticker: &str, map: WeeklyPriceHashMap) -> Result
 
     for (k, mut v) in map {
         let (year, week) = k;
-        v.sort_by(|a, b| a.date.cmp(&b.date));
+        v.sort_by_key(|a| a.date);
 
         let (open, high, low, close, volume) = aggregate_to_weekly(&v);
 

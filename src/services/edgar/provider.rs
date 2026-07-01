@@ -1,7 +1,8 @@
 use crate::model::{edgar, xbrl};
-use crate::utils::{http, settings::Settings, Result};
+use crate::utils::{Result, settings::Settings};
 
 pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
+    let web_client = reqwest::Client::new();
     let agent = Settings::instance().agent.sec_gov.clone();
     let urls = Settings::instance().urls.clone();
     let submission_url = format!("{}{}.json", urls.us_submissions, cik);
@@ -9,7 +10,7 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
     let host = req_url.host_str().unwrap();
 
     // Get a list of edgar reports from the internet
-    let res = http::client()
+    let res = web_client
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::USER_AGENT, &agent)
@@ -42,7 +43,7 @@ pub async fn get_statement(cik: &str) -> Result<edgar::StatementRes> {
     let req_url = reqwest::Url::parse(&url).unwrap();
     let host = req_url.host_str().unwrap();
 
-    let res = http::client()
+    let res = web_client
         .get(req_url.clone())
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::USER_AGENT, &agent)

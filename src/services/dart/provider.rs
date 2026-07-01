@@ -1,9 +1,10 @@
 use crate::model::dart;
-use crate::utils::{Result, db, error::Error, http, settings::Settings};
+use crate::utils::{Result, db, error::Error, settings::Settings};
 use std::io::Read;
 
 #[tracing::instrument(err)]
 pub async fn build_code_db() -> Result<()> {
+    let web_client = reqwest::Client::new();
     let key = Settings::instance().keys.dart.clone();
     let url = Settings::instance().urls.dart_code.clone();
 
@@ -12,7 +13,7 @@ pub async fn build_code_db() -> Result<()> {
         reqwest::Url::parse_with_params(&url, &[("crtfc_key", key.as_str())]).unwrap();
     let host = req_url_with_params.host_str().unwrap();
 
-    let buf: Vec<u8> = http::client()
+    let buf: Vec<u8> = web_client
         .get(req_url_with_params.clone())
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::ACCEPT, "application/xml;charset=UTF-8")
@@ -118,6 +119,7 @@ pub async fn get_index(
     report_code: &str,
     idx_code: &str,
 ) -> Result<dart::IndexRes> {
+    let web_client = reqwest::Client::new();
     let last_year = time::OffsetDateTime::now_utc().year() - 1;
     let key = Settings::instance().keys.dart.clone();
     let url = Settings::instance().urls.dart_index.clone();
@@ -136,7 +138,7 @@ pub async fn get_index(
     )
     .unwrap();
 
-    let mut res = http::client()
+    let mut res = web_client
         .get(req_url_with_params.clone())
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
@@ -161,7 +163,7 @@ pub async fn get_index(
         )
         .unwrap();
 
-        res = http::client()
+        res = web_client
             .get(req_url_with_params)
             .header(reqwest::header::HOST, host)
             .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
@@ -181,6 +183,7 @@ pub async fn get_statement(
     report_code: &str,
     fs_div: &str,
 ) -> Result<dart::StatementRes> {
+    let web_client = reqwest::Client::new();
     let last_year = time::OffsetDateTime::now_utc().year() - 1;
     let key = Settings::instance().keys.dart.clone();
     let url = Settings::instance().urls.dart_statement.clone();
@@ -199,7 +202,7 @@ pub async fn get_statement(
     )
     .unwrap();
 
-    let mut res = http::client()
+    let mut res = web_client
         .get(req_url_with_params.clone())
         .header(reqwest::header::HOST, host)
         .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
@@ -224,7 +227,7 @@ pub async fn get_statement(
         )
         .unwrap();
 
-        res = http::client()
+        res = web_client
             .get(req_url_with_params)
             .header(reqwest::header::HOST, host)
             .header(reqwest::header::ACCEPT, "application/json;charset=UTF-8")
