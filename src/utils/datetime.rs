@@ -93,7 +93,7 @@ pub fn date_serialize<S>(t: &time::Date, serializer: S) -> Result<S::Ok, S::Erro
 where
     S: serde::Serializer,
 {
-    let format = time::format_description::parse("[year]-[month]-[day]").unwrap();
+    let format = time::format_description::parse_borrowed::<3>("[year]-[month]-[day]").unwrap();
     let s = t.format(&format).unwrap();
     serializer.serialize_str(&s)
 }
@@ -104,7 +104,7 @@ where
     S: serde::Serializer,
 {
     if let Some(tt) = t {
-        let format = time::format_description::parse("[year]-[month]-[day]").unwrap();
+        let format = time::format_description::parse_borrowed::<3>("[year]-[month]-[day]").unwrap();
         let s = tt.format(&format).unwrap();
         serializer.serialize_str(&s)
     } else {
